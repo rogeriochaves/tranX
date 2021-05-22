@@ -40,7 +40,8 @@ class Dataset(object):
 
         batch_num = int(np.ceil(len(self.examples) / float(batch_size)))
         for batch_id in range(batch_num):
-            batch_ids = index_arr[batch_size * batch_id: batch_size * (batch_id + 1)]
+            batch_ids = index_arr[batch_size *
+                                  batch_id: batch_size * (batch_id + 1)]
             batch_examples = [self.examples[i] for i in batch_ids]
             batch_examples.sort(key=lambda e: -len(e.src_sent))
 
@@ -86,7 +87,8 @@ class Batch(object):
         ids = []
         for e in self.examples:
             if t < len(e.tgt_actions):
-                ids.append(self.grammar.field2id[e.tgt_actions[t].frontier_field])
+                ids.append(
+                    self.grammar.field2id[e.tgt_actions[t].frontier_field])
                 # assert self.grammar.id2field[ids[-1]] == e.tgt_actions[t].frontier_field
             else:
                 ids.append(0)
@@ -97,7 +99,8 @@ class Batch(object):
         ids = []
         for e in self.examples:
             if t < len(e.tgt_actions):
-                ids.append(self.grammar.prod2id[e.tgt_actions[t].frontier_prod])
+                ids.append(
+                    self.grammar.prod2id[e.tgt_actions[t].frontier_prod])
                 # assert self.grammar.id2prod[ids[-1]] == e.tgt_actions[t].frontier_prod
             else:
                 ids.append(0)
@@ -108,7 +111,8 @@ class Batch(object):
         ids = []
         for e in self.examples:
             if t < len(e.tgt_actions):
-                ids.append(self.grammar.type2id[e.tgt_actions[t].frontier_field.type])
+                ids.append(
+                    self.grammar.type2id[e.tgt_actions[t].frontier_field.type])
                 # assert self.grammar.id2type[ids[-1]] == e.tgt_actions[t].frontier_field.type
             else:
                 ids.append(0)
@@ -121,7 +125,8 @@ class Batch(object):
         self.primitive_idx_matrix = []
         self.gen_token_mask = []
         self.primitive_copy_mask = []
-        self.primitive_copy_token_idx_mask = np.zeros((self.max_action_num, len(self), max(self.src_sents_len)), dtype='float32')
+        self.primitive_copy_token_idx_mask = np.zeros(
+            (self.max_action_num, len(self), max(self.src_sents_len)), dtype='float32')
 
         for t in range(self.max_action_num):
             app_rule_idx_row = []
@@ -151,8 +156,10 @@ class Batch(object):
                         token_can_copy = False
 
                         if self.copy and token in src_sent:
-                            token_pos_list = [idx for idx, _token in enumerate(src_sent) if _token == token]
-                            self.primitive_copy_token_idx_mask[t, e_id, token_pos_list] = 1.
+                            token_pos_list = [idx for idx, _token in enumerate(
+                                src_sent) if _token == token]
+                            self.primitive_copy_token_idx_mask[t,
+                                                               e_id, token_pos_list] = 1.
                             copy_mask = 1
                             token_can_copy = True
 
@@ -193,13 +200,18 @@ class Batch(object):
             self.primitive_copy_mask.append(copy_mask_row)
 
         T = torch.cuda if self.cuda else torch
-        self.apply_rule_idx_matrix = Variable(T.LongTensor(self.apply_rule_idx_matrix))
+        self.apply_rule_idx_matrix = Variable(
+            T.LongTensor(self.apply_rule_idx_matrix))
         self.apply_rule_mask = Variable(T.FloatTensor(self.apply_rule_mask))
-        self.primitive_idx_matrix = Variable(T.LongTensor(self.primitive_idx_matrix))
+        self.primitive_idx_matrix = Variable(
+            T.LongTensor(self.primitive_idx_matrix))
         self.gen_token_mask = Variable(T.FloatTensor(self.gen_token_mask))
-        self.primitive_copy_mask = Variable(T.FloatTensor(self.primitive_copy_mask))
-        self.primitive_copy_token_idx_mask = Variable(torch.from_numpy(self.primitive_copy_token_idx_mask))
-        if self.cuda: self.primitive_copy_token_idx_mask = self.primitive_copy_token_idx_mask.cuda()
+        self.primitive_copy_mask = Variable(
+            T.FloatTensor(self.primitive_copy_mask))
+        self.primitive_copy_token_idx_mask = Variable(
+            torch.from_numpy(self.primitive_copy_token_idx_mask))
+        if self.cuda:
+            self.primitive_copy_token_idx_mask = self.primitive_copy_token_idx_mask.cuda()
 
     @property
     def primitive_mask(self):
@@ -223,6 +235,5 @@ class Batch(object):
         for e_id, e in enumerate(self.examples):
             aggregated_primitive_tokens = OrderedDict()
             for token_pos, token in enumerate(e.src_sent):
-                aggregated_primitive_tokens.setdefault(token, []).append(token_pos)
-
-
+                aggregated_primitive_tokens.setdefault(
+                    token, []).append(token_pos)

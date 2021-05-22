@@ -26,5 +26,8 @@ def get_example_processor_cls(dataset):
     elif dataset == 'conala':
         from datasets.conala.example_processor import ConalaExampleProcessor
         return ConalaExampleProcessor
+    elif dataset == 'natural':
+        from datasets.natural.example_processor import NaturalExampleProcessor
+        return NaturalExampleProcessor
     else:
         raise RuntimeError()

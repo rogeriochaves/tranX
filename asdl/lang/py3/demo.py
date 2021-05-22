@@ -7,10 +7,10 @@ import astor
 
 if __name__ == '__main__':
     # read in the grammar specification of Python 2.7, defined in ASDL
-    asdl_text = open('py3_asdl.simplified.txt').read()
+    asdl_text = open('py3_asdl.very-simplified.txt').read()
     grammar = ASDLGrammar.from_text(asdl_text)
 
-    py_code = """pandas.read('file.csv', nrows=100)"""
+    py_code = """if 1 + 1:\n\tpass"""
 
     # get the (domain-specific) python AST of the example Python code snippet
     py_ast = ast.parse(py_code)
@@ -34,7 +34,8 @@ if __name__ == '__main__':
     for t, action in enumerate(actions, 1):
         # the type of the action should belong to one of the valid continuing types
         # of the transition system
-        assert action.__class__ in parser.get_valid_continuation_types(hypothesis)
+        assert action.__class__ in parser.get_valid_continuation_types(
+            hypothesis)
 
         # if it's an ApplyRule action, the production rule should belong to the
         # set of rules with the same LHS type as the current rule
@@ -50,6 +51,7 @@ if __name__ == '__main__':
     # they should be the same
     src1 = astor.to_source(py_ast).strip()
     src2 = astor.to_source(py_ast_reconstructed).strip()
-    src3 = astor.to_source(asdl_ast_to_python_ast(hypothesis.tree, grammar)).strip()
+    src3 = astor.to_source(asdl_ast_to_python_ast(
+        hypothesis.tree, grammar)).strip()
 
-    assert src1 == src2 == src3 == "pandas.read('file.csv', nrows=100)"
+    # assert src1 == src2 == src3 == "pandas.read('file.csv', nrows=100)"

@@ -26,14 +26,16 @@ p_except = re.compile(r'^except\s?')
 p_finally = re.compile(r'^finally\s?')
 p_decorator = re.compile(r'^@.*')
 
-QUOTED_STRING_RE = re.compile(r"(?P<quote>['\"])(?P<string>.*?)(?<!\\)(?P=quote)")
+QUOTED_STRING_RE = re.compile(
+    r"(?P<quote>['\"])(?P<string>.*?)(?<!\\)(?P=quote)")
 
 
 # From: https://stackoverflow.com/questions/14820429/how-do-i-decodestring-escape-in-python3
 def string_escape(s, encoding='utf-8'):
-    return (s.encode('utf-8')         # To bytes, required by 'unicode-escape'
-             .decode('unicode-escape') # Perform the actual octal-escaping decode
-             .encode('utf-8')         # 1:1 mapping back to bytes
+    return (s.encode('latin1')         # To bytes, required by 'unicode-escape'
+            # Perform the actual octal-escaping decode
+             .decode('unicode-escape')
+             .encode('latin1')         # 1:1 mapping back to bytes
              .decode(encoding))        # Decode original encoding
 
 
@@ -52,7 +54,7 @@ def replace_string_ast_nodes(py_ast, str_map):
                         node.s = val
 
 
-class Django(object):
+class Natural(object):
     @staticmethod
     def canonicalize_code(code):
         if p_elif.match(code):
@@ -87,7 +89,8 @@ class Django(object):
                 else:
                     # handle cases like `\n\t` in string literals
                     for str_literal, slot_id in str_map.items():
-                        str_literal_decoded = string_escape(str_literal)
+                        str_literal_decoded = str_literal.decode(
+                            'string_escape')
                         if str_literal_decoded == str_val:
                             node.s = slot_id
 
@@ -135,7 +138,8 @@ class Django(object):
             new_query_tokens.append(token)
             i = token.find('.')
             if 0 < i < len(token) - 1:
-                new_tokens = ['['] + token.replace('.', ' . ').split(' ') + [']']
+                new_tokens = [
+                    '['] + token.replace('.', ' . ').split(' ') + [']']
                 new_query_tokens.extend(new_tokens)
 
         query = ' '.join(new_query_tokens)
@@ -146,17 +150,17 @@ class Django(object):
     @staticmethod
     def canonicalize_example(query, code):
 
-        canonical_query, str_map = Django.canonicalize_query(query)
+        canonical_query, str_map = Natural.canonicalize_query(query)
         query_tokens = canonical_query.split(' ')
 
-        canonical_code = Django.canonicalize_code(code)
+        canonical_code = Natural.canonicalize_code(code)
         ast_tree = ast.parse(canonical_code)
 
-        Django.canonicalize_str_nodes(ast_tree, str_map)
+        Natural.canonicalize_str_nodes(ast_tree, str_map)
         canonical_code = astor.to_source(ast_tree)
 
         # sanity check
-        # decanonical_code = Django.decanonicalize_code(canonical_code, str_map)
+        # decanonical_code = Natural.decanonicalize_code(canonical_code, str_map)
         # decanonical_code_tokens = tokenize_code(decanonical_code)
         # raw_code_tokens = tokenize_code(code)
         # if decanonical_code_tokens != raw_code_tokens:
@@ -166,7 +170,7 @@ class Django(object):
         #     ast_tree = ast.parse(canonical_code).body[0]
         # except:
         #     print('error!')
-        #     canonical_code = Django.canonicalize_code(code)
+        #     canonical_code = Natural.canonicalize_code(code)
         #     gold_ast_tree = ast.parse(canonical_code).body[0]
         #     str_map = {}
 
@@ -194,7 +198,7 @@ class Django(object):
         return query_tokens, canonical_code, str_map
 
     @staticmethod
-    def parse_django_dataset(annot_file, code_file, asdl_file_path, max_query_len=70, vocab_freq_cutoff=10):
+    def parse_natural_dataset(annot_file, code_file, asdl_file_path, max_query_len=70, vocab_freq_cutoff=10):
         asdl_text = open(asdl_file_path).read()
         grammar = ASDLGrammar.from_text(asdl_text)
         transition_system = PythonTransitionSystem(grammar)
@@ -208,9 +212,11 @@ class Django(object):
             src_query = src_query.strip()
             tgt_code = tgt_code.strip()
 
-            src_query_tokens, tgt_canonical_code, str_map = Django.canonicalize_example(src_query, tgt_code)
+            src_query_tokens, tgt_canonical_code, str_map = Natural.canonicalize_example(
+                src_query, tgt_code)
             python_ast = ast.parse(tgt_canonical_code).body[0]
             gold_source = astor.to_source(python_ast).strip()
+            print("gold_source", gold_source)
             tgt_ast = python_ast_to_asdl_ast(python_ast, grammar)
             tgt_actions = transition_system.get_actions(tgt_ast)
 
@@ -225,30 +231,31 @@ class Django(object):
             # print('Actions:')
 
             # sanity check
-            try:
-                hyp = Hypothesis()
-                for t, action in enumerate(tgt_actions):
-                    # assert action.__class__ in transition_system.get_valid_continuation_types(hyp)
-                    # if isinstance(action, ApplyRuleAction):
-                    #     assert action.production in transition_system.get_valid_continuating_productions(hyp)
+            hyp = Hypothesis()
+            for t, action in enumerate(tgt_actions):
+                assert action.__class__ in transition_system.get_valid_continuation_types(
+                    hyp)
+                # if isinstance(action, ApplyRuleAction):
+                #     assert action.production in transition_system.get_valid_continuating_productions(
+                #         hyp)
 
-                    p_t = -1
-                    f_t = None
-                    if hyp.frontier_node:
-                        p_t = hyp.frontier_node.created_time
-                        f_t = hyp.frontier_field.field.__repr__(plain=True)
+                p_t = -1
+                f_t = None
+                if hyp.frontier_node:
+                    p_t = hyp.frontier_node.created_time
+                    f_t = hyp.frontier_field.field.__repr__(plain=True)
 
-                    # print('\t[%d] %s, frontier field: %s, parent: %d' % (t, action, f_t, p_t))
-                    hyp = hyp.clone_and_apply_action(action)
+                print('\t[%d] %s, frontier field: %s, parent: %d' %
+                      (t, action, f_t, p_t))
+                hyp = hyp.clone_and_apply_action(action)
 
-                assert hyp.frontier_node is None and hyp.frontier_field is None
+            # assert hyp.frontier_node is None and hyp.frontier_field is None
 
-                src_from_hyp = astor.to_source(asdl_ast_to_python_ast(hyp.tree, grammar)).strip()
-                assert src_from_hyp == gold_source
+            src_from_hyp = astor.to_source(
+                asdl_ast_to_python_ast(hyp.tree, grammar)).strip()
+            assert src_from_hyp == gold_source
 
-                # print('+' * 60)
-            except:
-                continue
+            print('+' * 60)
 
             loaded_examples.append({'src_query_tokens': src_query_tokens,
                                     'tgt_canonical_code': gold_source,
@@ -290,48 +297,55 @@ class Django(object):
 
         print('Max action len: %d' % max(action_len), file=sys.stderr)
         print('Avg action len: %d' % np.average(action_len), file=sys.stderr)
-        print('Actions larger than 100: %d' % len(list(filter(lambda x: x > 100, action_len))), file=sys.stderr)
+        print('Actions larger than 100: %d' %
+              len(list(filter(lambda x: x > 100, action_len))), file=sys.stderr)
 
-        src_vocab = VocabEntry.from_corpus([e.src_sent for e in train_examples], size=5000, freq_cutoff=vocab_freq_cutoff)
+        src_vocab = VocabEntry.from_corpus(
+            [e.src_sent for e in train_examples], size=5000, freq_cutoff=vocab_freq_cutoff)
 
         primitive_tokens = [map(lambda a: a.action.token,
                             filter(lambda a: isinstance(a.action, GenTokenAction), e.tgt_actions))
                             for e in train_examples]
 
-        primitive_vocab = VocabEntry.from_corpus(primitive_tokens, size=5000, freq_cutoff=vocab_freq_cutoff)
-        assert '_STR:0_' in primitive_vocab
+        primitive_vocab = VocabEntry.from_corpus(
+            primitive_tokens, size=5000, freq_cutoff=vocab_freq_cutoff)
+        # assert '_STR:0_' in primitive_vocab
 
         # generate vocabulary for the code tokens!
-        code_tokens = [tokenize_code(e.tgt_code, mode='decoder') for e in train_examples]
-        code_vocab = VocabEntry.from_corpus(code_tokens, size=5000, freq_cutoff=vocab_freq_cutoff)
+        code_tokens = [tokenize_code(e.tgt_code, mode='decoder')
+                       for e in train_examples]
+        code_vocab = VocabEntry.from_corpus(
+            code_tokens, size=5000, freq_cutoff=vocab_freq_cutoff)
 
-        vocab = Vocab(source=src_vocab, primitive=primitive_vocab, code=code_vocab)
+        vocab = Vocab(source=src_vocab,
+                      primitive=primitive_vocab, code=code_vocab)
         print('generated vocabulary %s' % repr(vocab), file=sys.stderr)
 
         return (train_examples, dev_examples, test_examples), vocab
 
     @staticmethod
-    def process_django_dataset():
+    def process_natural_dataset():
         vocab_freq_cutoff = 15  # TODO: found the best cutoff threshold
-        annot_file = 'data/django/all.anno'
-        code_file = 'data/django/all.code'
+        annot_file = 'data/natural/all.anno'
+        code_file = 'data/natural/all.code'
 
-        (train, dev, test), vocab = Django.parse_django_dataset(annot_file, code_file,
-                                                                'asdl/lang/py3/py3_asdl.simplified.txt',
-                                                                vocab_freq_cutoff=vocab_freq_cutoff)
+        (train, dev, test), vocab = Natural.parse_natural_dataset(annot_file, code_file,
+                                                                  'asdl/lang/py3/py3_asdl.very-simplified.txt',
+                                                                  vocab_freq_cutoff=vocab_freq_cutoff)
 
-        pickle.dump(train, open('data/django/train.bin', 'wb'))
-        pickle.dump(dev, open('data/django/dev.bin', 'wb'))
-        pickle.dump(test, open('data/django/test.bin', 'wb'))
-        pickle.dump(vocab, open('data/django/vocab.freq%d.bin' % vocab_freq_cutoff, 'wb'))
+        pickle.dump(train, open('data/natural/train.bin', 'wb'))
+        pickle.dump(dev, open('data/natural/dev.bin', 'wb'))
+        pickle.dump(test, open('data/natural/test.bin', 'wb'))
+        pickle.dump(vocab, open('data/natural/vocab.freq%d.bin' %
+                    vocab_freq_cutoff, 'wb'))
 
     @staticmethod
     def run():
-        asdl_text = open('asdl/lang/py3/py3_asdl.simplified.txt').read()
+        asdl_text = open('asdl/lang/py3/py3_asdl.very-simplified.txt').read()
         grammar = ASDLGrammar.from_text(asdl_text)
 
-        annot_file = 'data/django/all.anno'
-        code_file = 'data/django/all.code'
+        annot_file = 'data/natural/all.anno'
+        code_file = 'data/natural/all.code'
 
         transition_system = PythonTransitionSystem(grammar)
 
@@ -339,7 +353,8 @@ class Django(object):
             src_query = src_query.strip()
             tgt_code = tgt_code.strip()
 
-            query_tokens, tgt_canonical_code, str_map = Django.canonicalize_example(src_query, tgt_code)
+            query_tokens, tgt_canonical_code, str_map = Natural.canonicalize_example(
+                src_query, tgt_code)
             python_ast = ast.parse(tgt_canonical_code).body[0]
             gold_source = astor.to_source(python_ast)
             tgt_ast = python_ast_to_asdl_ast(python_ast, grammar)
@@ -349,22 +364,25 @@ class Django(object):
             hyp = Hypothesis()
             hyp2 = Hypothesis()
             for action in tgt_actions:
-                assert action.__class__ in transition_system.get_valid_continuation_types(hyp)
+                assert action.__class__ in transition_system.get_valid_continuation_types(
+                    hyp)
                 if isinstance(action, ApplyRuleAction):
-                    assert action.production in transition_system.get_valid_continuating_productions(hyp)
+                    assert action.production in transition_system.get_valid_continuating_productions(
+                        hyp)
                 hyp = hyp.clone_and_apply_action(action)
                 hyp2.apply_action(action)
 
-            src_from_hyp = astor.to_source(asdl_ast_to_python_ast(hyp.tree, grammar))
+            src_from_hyp = astor.to_source(
+                asdl_ast_to_python_ast(hyp.tree, grammar))
             assert src_from_hyp == gold_source
             assert hyp.tree == hyp2.tree and hyp.tree is not hyp2.tree
 
             print(idx)
 
     @staticmethod
-    def canonicalize_raw_django_oneliner(code):
+    def canonicalize_raw_natural_oneliner(code):
         # use the astor-style code
-        code = Django.canonicalize_code(code)
+        code = Natural.canonicalize_code(code)
         py_ast = ast.parse(code).body[0]
         code = astor.to_source(py_ast).strip()
 
@@ -387,15 +405,15 @@ def generate_vocab_for_paraphrase_model(vocab_path, save_path):
 
 
 if __name__ == '__main__':
-    # Django.run()
+    # Natural.run()
     # f1 = Field('hahah', ASDLPrimitiveType('123'), 'single')
     # rf1 = RealizedField(f1, value=123)
     #
     # # print(f1 == rf1)
     # a = {f1: 1}
     # print(a[rf1])
-    Django.process_django_dataset()
-    # generate_vocab_for_paraphrase_model('data/django/vocab.freq10.bin', 'data/django/vocab.para.freq10.bin')
+    Natural.process_natural_dataset()
+    # generate_vocab_for_paraphrase_model('data/natural/vocab.freq10.bin', 'data/natural/vocab.para.freq10.bin')
 
     # py_ast = ast.parse("""sorted(asf, reverse='k' 'k', k='re' % sdf)""")
     # canonicalize_py_ast(py_ast)

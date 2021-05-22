@@ -67,7 +67,8 @@ def get_canonical_order_of_logical_form(lf, order_by='alphabet', _get_order=None
 
     def _order(_lf):
         if _lf.name in ('and', 'or'):
-            _lf.children = sorted(_lf.children, key=lambda x: _get_order(x.name))
+            _lf.children = sorted(
+                _lf.children, key=lambda x: _get_order(x.name))
         for child in _lf.children:
             _order(child)
 
@@ -207,7 +208,8 @@ def logical_form_to_ast(grammar, lf_node):
         # expr -> Compare(cmp_op op, expr left, expr right)
         prod = grammar.get_prod_by_ctr_name('Compare')
         op_name = 'GreaterThan' if lf_node.name == '>' else 'Equal' if lf_node.name == '=' else 'LessThan'
-        op_field = RealizedField(prod['op'], AbstractSyntaxTree(grammar.get_prod_by_ctr_name(op_name)))
+        op_field = RealizedField(prod['op'], AbstractSyntaxTree(
+            grammar.get_prod_by_ctr_name(op_name)))
 
         left_node = lf_node.children[0]
         left_ast_node = logical_form_to_ast(grammar, left_node)
@@ -259,12 +261,12 @@ def logical_form_to_ast(grammar, lf_node):
         ast_node = AbstractSyntaxTree(prod,
                                       [RealizedField(prod['variable'], value=lf_node.name)])
     elif ':ap' in lf_node.name or ':fb' in lf_node.name or ':mf' in lf_node.name or \
-                    ':me' in lf_node.name or ':cl' in lf_node.name or ':pd' in lf_node.name or \
-                    ':dc' in lf_node.name or ':al' in lf_node.name or \
-                    lf_node.name in ['yr0', 'do0', 'fb1', 'rc0', 'ci0', 'fn0', 'ap0', 'al1', 'al2', 'ap1', 'ci1',
-                                     'ci2', 'ci3', 'st0', 'ti0', 'ti1', 'da0', 'da1', 'da2', 'da3', 'da4', 'al0',
-                                     'fb0', 'dn0', 'dn1', 'mn0', 'ac0', 'fn1', 'st1', 'st2',
-                                     'c0', 'm0', 's0', 'r0', 'n0', 'co0', 'usa:co', 'death_valley:lo', 's1',
+        ':me' in lf_node.name or ':cl' in lf_node.name or ':pd' in lf_node.name or \
+        ':dc' in lf_node.name or ':al' in lf_node.name or \
+        lf_node.name in ['yr0', 'do0', 'fb1', 'rc0', 'ci0', 'fn0', 'ap0', 'al1', 'al2', 'ap1', 'ci1',
+                         'ci2', 'ci3', 'st0', 'ti0', 'ti1', 'da0', 'da1', 'da2', 'da3', 'da4', 'al0',
+                         'fb0', 'dn0', 'dn1', 'mn0', 'ac0', 'fn1', 'st1', 'st2',
+                         'c0', 'm0', 's0', 'r0', 'n0', 'co0', 'usa:co', 'death_valley:lo', 's1',
                                      'colorado:n']:
         prod = grammar.get_prod_by_ctr_name('Entity')
         ast_node = AbstractSyntaxTree(prod,
@@ -316,10 +318,12 @@ def ast_to_logical_form(ast_tree):
         domain_node = ast_to_logical_form(ast_tree['domain'].value)
         body_node = ast_to_logical_form(ast_tree['body'].value)
 
-        node = Node(constructor_name.lower(), [var_node, domain_node, body_node])
+        node = Node(constructor_name.lower(), [
+                    var_node, domain_node, body_node])
     elif constructor_name == 'Apply':
         predicate = ast_tree['predicate'].value
-        arg_nodes = [ast_to_logical_form(tree) for tree in ast_tree['arguments'].value]
+        arg_nodes = [ast_to_logical_form(tree)
+                     for tree in ast_tree['arguments'].value]
 
         node = Node(predicate, arg_nodes)
     elif constructor_name in ['Count', 'Exists', 'Max', 'Min', 'The']:
@@ -328,7 +332,8 @@ def ast_to_logical_form(ast_tree):
 
         node = Node(constructor_name.lower(), [var_node, body_node])
     elif constructor_name in ['And', 'Or']:
-        arg_nodes = [ast_to_logical_form(tree) for tree in ast_tree['arguments'].value]
+        arg_nodes = [ast_to_logical_form(tree)
+                     for tree in ast_tree['arguments'].value]
 
         node = Node(constructor_name.lower(), arg_nodes)
     elif constructor_name == 'Not':
@@ -336,7 +341,8 @@ def ast_to_logical_form(ast_tree):
 
         node = Node('not', arg_node)
     elif constructor_name == 'Compare':
-        op = {'GreaterThan': '>', 'Equal': '=', 'LessThan': '<'}[ast_tree['op'].value.production.constructor.name]
+        op = {'GreaterThan': '>', 'Equal': '=', 'LessThan': '<'}[
+            ast_tree['op'].value.production.constructor.name]
         left_node = ast_to_logical_form(ast_tree['left'].value)
         right_node = ast_to_logical_form(ast_tree['right'].value)
 

@@ -55,6 +55,7 @@ def train(args):
     grammar = ASDLGrammar.from_text(open(args.asdl_file).read())
     transition_system = Registrable.by_name(args.transition_system)(grammar)
 
+    print("args.parser", args.parser)
     parser_cls = Registrable.by_name(args.parser)  # TODO: add arg
     if args.pretrain:
         print('Finetune with: ', args.pretrain, file=sys.stderr)
@@ -469,7 +470,7 @@ def test(args):
     args.lang = saved_args.lang
 
     parser_cls = Registrable.by_name(args.parser)
-    parser = parser_cls.load(model_path=args.load_model, cuda=args.cuda)
+    parser = parser_cls.load(model_path=args.load_model, cuda=False)#, cuda=args.cuda)
     parser.eval()
     evaluator = Registrable.by_name(args.evaluator)(transition_system, args=args)
     eval_results, decode_results = evaluation.evaluate(test_set.examples, parser, evaluator, args,
