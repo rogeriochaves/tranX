@@ -12,12 +12,10 @@ import sys
 
 import numpy as np
 
-from asdl.lang.py.py_asdl_helper import python_ast_to_asdl_ast, asdl_ast_to_python_ast
-from asdl.lang.py.py_transition_system import PythonTransitionSystem
+from asdl.lang.py3.py3_transition_system import python_ast_to_asdl_ast, asdl_ast_to_python_ast, Python3TransitionSystem, tokenize_code
 from asdl.hypothesis import *
-from asdl.lang.py.py_utils import tokenize_code
 
-from components.action_info import ActionInfo, get_action_infos
+from components.action_info import get_action_infos
 
 p_elif = re.compile(r'^elif\s?')
 p_else = re.compile(r'^else\s?')
@@ -32,10 +30,9 @@ QUOTED_STRING_RE = re.compile(
 
 # From: https://stackoverflow.com/questions/14820429/how-do-i-decodestring-escape-in-python3
 def string_escape(s, encoding='utf-8'):
-    return (s.encode('latin1')         # To bytes, required by 'unicode-escape'
-            # Perform the actual octal-escaping decode
-             .decode('unicode-escape')
-             .encode('latin1')         # 1:1 mapping back to bytes
+    return (s.encode('utf-8')          # To bytes, required by 'unicode-escape'
+             .decode('unicode-escape') # Perform the actual octal-escaping decode
+             .encode('utf-8')          # 1:1 mapping back to bytes
              .decode(encoding))        # Decode original encoding
 
 
@@ -89,8 +86,7 @@ class Natural(object):
                 else:
                     # handle cases like `\n\t` in string literals
                     for str_literal, slot_id in str_map.items():
-                        str_literal_decoded = str_literal.decode(
-                            'string_escape')
+                        str_literal_decoded = string_escape(str_literal)
                         if str_literal_decoded == str_val:
                             node.s = slot_id
 
@@ -182,7 +178,7 @@ class Natural(object):
         # assert gold_source == source, 'sanity check fails: gold=[%s], actual=[%s]' % (gold_source, source)
         #
         # # action check
-        # parser = PythonTransitionSystem(grammar)
+        # parser = Python3TransitionSystem(grammar)
         # actions = parser.get_actions(parse_tree)
         #
         # hyp = Hypothesis()
@@ -201,7 +197,7 @@ class Natural(object):
     def parse_natural_dataset(annot_file, code_file, asdl_file_path, max_query_len=70, vocab_freq_cutoff=10):
         asdl_text = open(asdl_file_path).read()
         grammar = ASDLGrammar.from_text(asdl_text)
-        transition_system = PythonTransitionSystem(grammar)
+        transition_system = Python3TransitionSystem(grammar)
 
         loaded_examples = []
 
@@ -214,10 +210,9 @@ class Natural(object):
 
             src_query_tokens, tgt_canonical_code, str_map = Natural.canonicalize_example(
                 src_query, tgt_code)
-            python_ast = ast.parse(tgt_canonical_code).body[0]
+            python_ast = ast.parse(tgt_canonical_code)#.body[0]
             gold_source = astor.to_source(python_ast).strip()
-            print("gold_source", gold_source)
-            tgt_ast = python_ast_to_asdl_ast(python_ast, grammar)
+            tgt_ast = python_ast_to_asdl_ast(python_ast, transition_system.grammar)
             tgt_actions = transition_system.get_actions(tgt_ast)
 
             # print('+' * 60)
@@ -233,11 +228,11 @@ class Natural(object):
             # sanity check
             hyp = Hypothesis()
             for t, action in enumerate(tgt_actions):
-                assert action.__class__ in transition_system.get_valid_continuation_types(
-                    hyp)
-                # if isinstance(action, ApplyRuleAction):
-                #     assert action.production in transition_system.get_valid_continuating_productions(
-                #         hyp)
+                assert action.__class__ in transition_system.get_valid_continuation_types(hyp)
+                if isinstance(action, ApplyRuleAction):
+                    assert action.production in transition_system.get_valid_continuating_productions(hyp)
+                # assert action.__class__ in transition_system.get_valid_continuation_types(
+                    # hyp)
 
                 p_t = -1
                 f_t = None
@@ -245,17 +240,18 @@ class Natural(object):
                     p_t = hyp.frontier_node.created_time
                     f_t = hyp.frontier_field.field.__repr__(plain=True)
 
-                print('\t[%d] %s, frontier field: %s, parent: %d' %
-                      (t, action, f_t, p_t))
+                # print('\t[%d] %s, frontier field: %s, parent: %d' %
+                #     (t, action, f_t, p_t))
                 hyp = hyp.clone_and_apply_action(action)
 
             # assert hyp.frontier_node is None and hyp.frontier_field is None
 
             src_from_hyp = astor.to_source(
                 asdl_ast_to_python_ast(hyp.tree, grammar)).strip()
-            assert src_from_hyp == gold_source
+            if "b'" not in str(gold_source) and 'b"' not in str(gold_source):
+                assert src_from_hyp == gold_source
 
-            print('+' * 60)
+            # print('+' * 60)
 
             loaded_examples.append({'src_query_tokens': src_query_tokens,
                                     'tgt_canonical_code': gold_source,
@@ -330,7 +326,7 @@ class Natural(object):
         code_file = 'data/natural/all.code'
 
         (train, dev, test), vocab = Natural.parse_natural_dataset(annot_file, code_file,
-                                                                  'asdl/lang/py3/py3_asdl.very-simplified.txt',
+                                                                  'asdl/lang/py3/py3_asdl.simplified.txt',
                                                                   vocab_freq_cutoff=vocab_freq_cutoff)
 
         pickle.dump(train, open('data/natural/train.bin', 'wb'))
@@ -341,13 +337,13 @@ class Natural(object):
 
     @staticmethod
     def run():
-        asdl_text = open('asdl/lang/py3/py3_asdl.very-simplified.txt').read()
+        asdl_text = open('asdl/lang/py3/py3_asdl.simplified.txt').read()
         grammar = ASDLGrammar.from_text(asdl_text)
 
         annot_file = 'data/natural/all.anno'
         code_file = 'data/natural/all.code'
 
-        transition_system = PythonTransitionSystem(grammar)
+        transition_system = Python3TransitionSystem(grammar)
 
         for idx, (src_query, tgt_code) in enumerate(zip(open(annot_file), open(code_file))):
             src_query = src_query.strip()
@@ -355,7 +351,7 @@ class Natural(object):
 
             query_tokens, tgt_canonical_code, str_map = Natural.canonicalize_example(
                 src_query, tgt_code)
-            python_ast = ast.parse(tgt_canonical_code).body[0]
+            python_ast = ast.parse(tgt_canonical_code)#.body[0]
             gold_source = astor.to_source(python_ast)
             tgt_ast = python_ast_to_asdl_ast(python_ast, grammar)
             tgt_actions = transition_system.get_actions(tgt_ast)
@@ -383,7 +379,7 @@ class Natural(object):
     def canonicalize_raw_natural_oneliner(code):
         # use the astor-style code
         code = Natural.canonicalize_code(code)
-        py_ast = ast.parse(code).body[0]
+        py_ast = ast.parse(code)#.body[0]
         code = astor.to_source(py_ast).strip()
 
         return code

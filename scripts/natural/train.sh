@@ -28,7 +28,7 @@ python exp.py \
     --seed ${seed} \
     --mode train \
     --batch_size 10 \
-    --asdl_file asdl/lang/py3/py3_asdl.very-simplified.txt \
+    --asdl_file asdl/lang/py3/py3_asdl.simplified.txt \
     --transition_system python3 \
     --evaluator natural_evaluator \
     --train_file ${train_file} \
