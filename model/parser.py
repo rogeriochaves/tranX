@@ -731,9 +731,15 @@ class Parser(nn.Module):
                         if gentoken_new_hyp_unks:
                             token = gentoken_new_hyp_unks[k]
                         else:
-                            token = primitive_vocab.id2word(primitive_vocab.unk_id)
+                            if isinstance(primitive_vocab.id2word, dict):
+                                token = primitive_vocab.id2word[primitive_vocab.unk_id]
+                            else:
+                                token = primitive_vocab.id2word(primitive_vocab.unk_id)
                     else:
-                        token = primitive_vocab.id2word(token_id.item())
+                        if isinstance(primitive_vocab.id2word, dict):
+                            token = primitive_vocab.id2word[token_id.item()]
+                        else:
+                            token = primitive_vocab.id2word(token_id.item())
 
                     action = GenTokenAction(token)
 

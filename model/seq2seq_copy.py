@@ -274,7 +274,7 @@ class Seq2SeqWithCopy(Seq2SeqModel):
                         if gentoken_new_hyp_unks: word = gentoken_new_hyp_unks[prev_hyp_id]
                         else: word = self.tgt_vocab.id2word(self.tgt_vocab.unk_id)
                     else:
-                        word = self.tgt_vocab.id2word(word_id)
+                        word = self.tgt_vocab.id2word[word_id] if isinstance(self.tgt_vocab.id2word, dict) else self.tgt_vocab.id2word(word_id)
 
                     hyp_tgt_words = hypotheses[prev_hyp_id] + [word]
                     new_hypotheses.append(hyp_tgt_words)

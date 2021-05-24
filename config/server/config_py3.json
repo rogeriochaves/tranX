@@ -26,5 +26,12 @@
     "model_path": "data/pretrained_models/django.bin",
     "reranker_path": "best_pretrained_models/reranker.conala.vocab.src_freq3.code_freq3.mined_100000.intent_count100k_topk1_temp5.bin",
     "beam_size": 15
+  },
+  "natural": {
+    "parser": "default_parser",
+    "example_processor": "natural_example_processor",
+    "model_path": "saved_models/natural/model.sup.natural.lstm.hidden256.embed128.action128.field64.type64.dropout0.3.lr0.001.lr_decay0.5.beam_size15.vocab.freq15.bin.train.bin.glorot.par_state_w_field_embe.seed0.bin",
+    "reranker_path": "best_pretrained_models/reranker.conala.vocab.src_freq3.code_freq3.mined_100000.intent_count100k_topk1_temp5.bin",
+    "beam_size": 15
   }
 }

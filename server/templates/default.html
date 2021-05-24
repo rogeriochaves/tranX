@@ -45,7 +45,7 @@
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault">
           <span class="navbar-toggler-icon"></span>
         </button>
-  
+
         <div class="collapse navbar-collapse" id="navbarsExampleDefault">
           <ul class="navbar-nav mr-auto">
             <li class="nav-item active">
@@ -54,7 +54,7 @@
           </ul>
         </div>
     </nav>
-  
+
     <main role="main" class="container">
 
     <div class="starter-template">
@@ -120,6 +120,7 @@
                     <option value="atis">ATIS</option>
                     <option value="geo">GeoQuery</option>
                     <option value="django">Django</option>
+                    <option value="natural">Natural</option>
                 </select>
                 <input type="text" class="form-control" id="inputUtterance" placeholder="Enter query" style="width:70%;">
                 <button type="button" class="btn btn-primary" id="btn_parse">Parse</button>
@@ -130,7 +131,7 @@
         </div>
     </div>
 
-    </main><!-- /.container -->  
+    </main><!-- /.container -->
 
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
@@ -162,9 +163,9 @@
 
             $.get(post_url, {q: input_utterance}, function(data){
                 hypotheses = data['hypotheses'];
-                for (i = 0; i < hypotheses.length; i++) { 
+                for (i = 0; i < hypotheses.length; i++) {
                     hyp = hypotheses[i];
-                    
+
                     action_seq_html = '';
                     for (t = 0; t < hyp['actions'].length; t++) {
                         action_t = hyp['actions'][t];
@@ -189,9 +190,9 @@
                                 <div id="tree_container_hyp${hyp['id']}"></div>
                             </div>
                         </div>
-                        
+
                     </div>
-                </div>    
+                </div>
             </div>`;
 
                     $('.hypotheses').append(hyp_html);
@@ -200,7 +201,7 @@
                     var tree_json_data = parse(hyp['tree_repr'].replace(/\\/g, "\\\\"));
                     d3Tree(tree_json_data, hyp['id']);
                 }
-                
+
                 $('#btn_parse').prop('disabled', false);
                 $('#btn_parse').html('Parse')
             })

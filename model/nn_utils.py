@@ -69,10 +69,16 @@ def word2id(sents, vocab):
 
 
 def id2word(sents, vocab):
-    if type(sents[0]) == list:
-        return [[vocab.id2word(w) for w in s] for s in sents]
+    if isinstance(vocab.id2word, dict):
+        if type(sents[0]) == list:
+            return [[vocab.id2word[w] for w in s] for s in sents]
+        else:
+            return [vocab.id2word[w] for w in sents]
     else:
-        return [vocab.id2word(w) for w in sents]
+        if type(sents[0]) == list:
+            return [[vocab.id2word(w) for w in s] for s in sents]
+        else:
+            return [vocab.id2word(w) for w in sents]
 
 
 def to_input_variable(sequences, vocab, cuda=False, training=True, append_boundary_sym=False):
