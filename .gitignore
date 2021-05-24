@@ -109,3 +109,4 @@ data/
 
 # saved model files
 saved_models/
+decodes/ # should I really ignore this? idk
