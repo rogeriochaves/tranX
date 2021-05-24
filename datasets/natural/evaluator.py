@@ -14,8 +14,6 @@ class NaturalEvaluator(Evaluator):
         ref_code = example.tgt_code
         ref_py_ast = ast.parse(ref_code)#.body[0]
         ref_reformatted_code = astor.to_source(ref_py_ast).strip()
-        print("ref_code", ref_code)
-        print("ref_reformatted_code", ref_reformatted_code)
 
         ref_code_tokens = self.transition_system.tokenize_code(
             ref_reformatted_code)

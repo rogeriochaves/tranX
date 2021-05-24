@@ -284,9 +284,12 @@ class Natural(object):
             action_len.append(len(tgt_action_infos))
 
             # train, valid, test split
-            if 0 <= idx < 16000:
+            total_examples = len(loaded_examples)
+            split_size = np.ceil(total_examples * 0.05)
+            (dev_split, test_split) = (total_examples - split_size * 2, total_examples - split_size)
+            if 0 <= idx < dev_split:
                 train_examples.append(example)
-            elif 16000 <= idx < 17000:
+            elif dev_split <= idx < test_split:
                 dev_examples.append(example)
             else:
                 test_examples.append(example)

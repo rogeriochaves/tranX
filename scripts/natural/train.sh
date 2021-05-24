@@ -23,7 +23,7 @@ echo "**** Writing results to logs/natural/${model_name}.log ****"
 mkdir -p logs/natural
 echo commit hash: `git rev-parse HEAD` > logs/natural/${model_name}.log
 
-# --cuda \
+# --cuda
 python exp.py \
     --seed ${seed} \
     --mode train \
@@ -50,6 +50,6 @@ python exp.py \
     --lr_decay ${lr_decay} \
     --beam_size ${beam_size} \
     --log_every 50 \
-    --save_to saved_models/natural/${model_name} 2>&1 | tee -a logs/natural/${model_name}.log
+    --save_to saved_models/natural/${model_name} # 2>&1 | tee -a logs/natural/${model_name}.log
 
 . scripts/natural/test.sh saved_models/natural/${model_name}.bin 2>&1 | tee -a logs/natural/${model_name}.log
