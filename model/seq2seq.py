@@ -312,7 +312,7 @@ class Seq2SeqModel(nn.Module):
             for sample_id, y in enumerate(y_t.cpu().data):
                 if samples_len[sample_id] == 0:
                     mask_t.append(1.)
-                    word = self.tgt_vocab.id2word[y]
+                    word = self.tgt_vocab.id2word(y)
                     samples[sample_id].append(word)
                     if y == eos_wid:
                         samples_len[sample_id] = t + 1
@@ -434,7 +434,7 @@ class Seq2SeqModel(nn.Module):
 
         if to_word:
             for i, hyp in enumerate(completed_hypotheses):
-                completed_hypotheses[i] = [self.tgt_vocab.id2word[w] for w in hyp]
+                completed_hypotheses[i] = [self.tgt_vocab.id2word(w) for w in hyp]
 
         ranked_hypotheses = sorted(zip(completed_hypotheses, completed_hypothesis_scores), key=lambda x: x[1], reverse=True)
 
