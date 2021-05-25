@@ -199,3 +199,9 @@ To train model:
 ```bash
 ./scripts/natural/train.sh
 ```
+
+To generate data:
+
+```bash
+PYTHONPATH=. python3 datasets/natural/dataset/assignment/generate.py
+```
