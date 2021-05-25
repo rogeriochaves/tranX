@@ -61,8 +61,8 @@ def generate_value(possible_types=value_types):
 
 def save_generated(file, inputs, outputs):
   path = os.path.dirname(file)
-  with open(path + '/inputs.txt', 'w') as f:
+  with open(os.path.join(path, 'inputs.txt'), 'w') as f:
     f.write("\n".join(inputs))
 
-  with open(path + '/outputs.txt', 'w') as f:
+  with open(os.path.join(path, 'outputs.txt'), 'w') as f:
     f.write("\n".join(outputs))

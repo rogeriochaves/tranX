@@ -1,4 +1,4 @@
-from datasets.natural.dataset.base_generator import generate_name, generate_value, save_generated
+from datasets.natural.datagen.base_generator import generate_name, generate_value, save_generated
 from numpy.random import choice
 
 templates = {

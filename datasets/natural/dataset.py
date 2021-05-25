@@ -3,6 +3,7 @@
 from __future__ import print_function
 
 import torch
+import os
 import re
 import pickle
 import ast
@@ -194,17 +195,32 @@ class Natural(object):
         return query_tokens, canonical_code, str_map
 
     @staticmethod
-    def parse_natural_dataset(annot_file, code_file, asdl_file_path, max_query_len=70, vocab_freq_cutoff=10):
+    def parse_natural_dataset(asdl_file_path, max_query_len=70, vocab_freq_cutoff=10):
         asdl_text = open(asdl_file_path).read()
         grammar = ASDLGrammar.from_text(asdl_text)
         transition_system = Python3TransitionSystem(grammar)
 
         loaded_examples = []
 
+        annotations = []
+        codes = []
+        path = os.path.join(os.path.dirname(__file__), "datagen")
+        datagens = os.listdir(path)
+        for folder in datagens:
+            if "__" in folder or not os.path.isdir(os.path.join(path, folder)):
+                continue
+            with open(os.path.join(path, folder, "inputs.txt"), 'r') as file:
+                annotations += file.read().split('\n')
+            with open(os.path.join(path, folder, "outputs.txt"), 'r') as file:
+                codes += file.read().split('\n')
+        annotation_codes = list(zip(annotations, codes))
+        np.random.seed(42)
+        np.random.shuffle(annotation_codes)
+
         from components.vocab import Vocab, VocabEntry
         from components.dataset import Example
 
-        for idx, (src_query, tgt_code) in enumerate(zip(open(annot_file), open(code_file))):
+        for idx, (src_query, tgt_code) in enumerate(annotation_codes):
             src_query = src_query.strip()
             tgt_code = tgt_code.strip()
 
@@ -325,11 +341,8 @@ class Natural(object):
     @staticmethod
     def process_natural_dataset():
         vocab_freq_cutoff = 15  # TODO: found the best cutoff threshold
-        annot_file = 'data/natural/all.anno'
-        code_file = 'data/natural/all.code'
 
-        (train, dev, test), vocab = Natural.parse_natural_dataset(annot_file, code_file,
-                                                                  'asdl/lang/py3/py3_asdl.simplified.txt',
+        (train, dev, test), vocab = Natural.parse_natural_dataset('asdl/lang/py3/py3_asdl.simplified.txt',
                                                                   vocab_freq_cutoff=vocab_freq_cutoff)
 
         pickle.dump(train, open('data/natural/train.bin', 'wb'))

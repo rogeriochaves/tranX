@@ -1,5 +1,5 @@
-from datasets.natural.dataset.base_generator import generate_name, generate_value, save_generated
-import datasets.natural.dataset.operations.generate as addition
+from datasets.natural.datagen.base_generator import generate_name, generate_value, save_generated
+import datasets.natural.datagen.operations.generate as addition
 from numpy.random import choice
 
 templates = [
