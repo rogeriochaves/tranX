@@ -74,6 +74,8 @@ class Natural(object):
         if code[-1] == ':':
             code = code + 'pass'
 
+        code = code.replace("\\n", "\n")
+
         return code
 
     @staticmethod

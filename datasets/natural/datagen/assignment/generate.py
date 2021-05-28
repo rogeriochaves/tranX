@@ -1,5 +1,5 @@
 from datasets.natural.datagen.base_generator import generate_name, generate_value, save_generated
-import datasets.natural.datagen.operations.generate as addition
+import datasets.natural.datagen.operations.generate as operations
 from numpy.random import choice
 
 templates = [
@@ -26,12 +26,17 @@ for i in range(1000):
   inputs.append(input)
   outputs.append(output)
 
-for i in range(1000):
+def generate_sample():
   name = generate_name()
-  (expr_input, expr_output) = addition.generate_sample()
+  (expr_input, expr_output) = operations.generate_sample()
 
   input = choice(templates).replace("#NAME", name).replace("#VALUE", expr_input)
   output = "%s = %s" % (name, expr_output)
+
+  return (input, output)
+
+for i in range(1000):
+  (input, output) = generate_sample()
 
   inputs.append(input)
   outputs.append(output)
