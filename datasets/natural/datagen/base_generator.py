@@ -23,7 +23,9 @@ update_templates = [
 frequency_list = FreqDist(w.lower() for w in brown.words() if len(w) > 2)
 reserved_words = set(["get", "if", "while", "for", "break", "continue", "end", "any", "and",
                       "or", "remove", "delete", "set", "between", "same", "greater", "smaller",
-                      "equals", "use", "set", "let", "equals", "be", "to", "is"])
+                      "equals", "use", "set", "let", "equals", "be", "to", "is", "do", "done", "exit",
+                      "break", "continue", "times", "end", "let", "remove", "update", "jump", "go",
+                      "each"])
 stopwords_en = stopwords.words('english')
 
 letters = list(string.ascii_lowercase)
