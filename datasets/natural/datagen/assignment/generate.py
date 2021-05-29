@@ -21,7 +21,7 @@ for i in range(1000):
   (value, real_value) = generate_value()
 
   input = choice(templates).replace("#NAME", name).replace("#VALUE", value)
-  output = name + " = " + real_value
+  output = "%s = %s" % (name, real_value)
 
   inputs.append(input)
   outputs.append(output)

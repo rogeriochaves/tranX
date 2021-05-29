@@ -35,17 +35,20 @@ names = [ w for w, _ in frequency_list.most_common()[100:300]
 numbers = list(range(101))
 numbers_written = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten']
 
-value_types = ['string', 'number', 'written_number', 'variable']
+value_types = ['string', 'number', 'written_number', 'variable', 'list']
+
 
 def generate_name():
   return "_".join(choice(names, int(rand() * 3 + 1)))
+
 
 def generate_string():
   text = " ".join(choice(names, int(rand() * 3 + 1)))
   quote = "'" if rand() > 0.5 else '"'
   return quote + text + quote
 
-def generate_value(possible_types=value_types):
+
+def generate_value(possible_types=value_types, depth=0):
   value_type = choice(possible_types)
   if value_type == 'string':
     value = real_value = generate_string()
@@ -56,8 +59,37 @@ def generate_value(possible_types=value_types):
     real_value = numbers_written.index(value)
   elif value_type == 'variable':
     value = real_value = generate_name()
+  elif value_type == 'list':
+    (value, real_value) = generate_list(depth)
 
   return (str(value), str(real_value))
+
+
+def generate_list(depth=0):
+  list_type = choice(value_types)
+  list_length = int(rand() * 10)
+  if depth == 0:
+    list_style = choice(["brackets", "parens", "list of"])
+  else:
+    list_style = choice(["brackets", "parens"])
+  list = [ generate_value([ list_type ], depth=(depth + 1)) for _ in range(list_length) ]
+
+  real_value = "[" + ", ".join([ rv for _, rv in list ]) + "]"
+  if list_style == 'brackets':
+    value = "[" + ", ".join([ v for v, _ in list ]) + "]"
+  elif list_style == 'parens':
+    value = "(" + ", ".join([ v for v, _ in list ]) + ")"
+  elif list_style == 'list of':
+    connector = choice(["of", "with", "containing"])
+    if len(list) == 0:
+      value = "empty list"
+    elif len(list) == 1:
+      value = "list %s %s" % (connector, list[0][0])
+    else:
+      value = "list %s %s and %s" % (connector, ", ".join([ v for v, _ in list[0:-1] ]), list[-1][0])
+
+  return (value, real_value)
+
 
 def save_generated(file, inputs, outputs):
   path = os.path.dirname(file)
