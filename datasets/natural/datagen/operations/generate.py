@@ -35,7 +35,7 @@ update_templates = {
          "square #NAME"]
 }
 
-def generate_sample():
+def generate_sample(variable_to_use=None):
   operation = choice(list(templates.keys()))
   possible_types = ['number', 'written_number', 'variable']
   template = choice(templates[operation])
@@ -46,6 +46,9 @@ def generate_sample():
 
   (a, a_value) = generate_value(possible_types)
   (b, b_value) = generate_value(possible_types)
+
+  if variable_to_use is not None:
+    a = a_value = variable_to_use
 
   input = template.replace("#A", a).replace("#B", b)
   if "squared" in input:

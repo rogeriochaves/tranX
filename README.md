@@ -203,5 +203,5 @@ To train model:
 To generate data:
 
 ```bash
-PYTHONPATH=. python3 datasets/natural/datagen/assignment/generate.py
+PYTHONPATH=. python3 datasets/natural/datagen/generate_all.py
 ```

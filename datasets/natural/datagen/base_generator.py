@@ -20,12 +20,15 @@ update_templates = [
   "add #A to #B"
 ]
 
+value_types = ['string', 'number', 'written_number', 'variable', 'list']
+numbers_written = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten']
+
 frequency_list = FreqDist(w.lower() for w in brown.words() if len(w) > 2)
 reserved_words = set(["get", "if", "while", "for", "break", "continue", "end", "any", "and",
                       "or", "remove", "delete", "set", "between", "same", "greater", "smaller",
                       "equals", "use", "set", "let", "equals", "be", "to", "is", "do", "done", "exit",
                       "break", "continue", "times", "end", "let", "remove", "update", "jump", "go",
-                      "each"])
+                      "each", "switch", "case", "replace", "match"] + numbers_written + value_types)
 stopwords_en = stopwords.words('english')
 
 letters = list(string.ascii_lowercase)
@@ -35,9 +38,6 @@ names = [ w for w, _ in frequency_list.most_common()[100:300]
             and re.match("^[a-z]+$", w) ] + letters
 
 numbers = list(range(101))
-numbers_written = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten']
-
-value_types = ['string', 'number', 'written_number', 'variable', 'list']
 
 
 def generate_name():
@@ -68,17 +68,22 @@ def generate_value(possible_types=value_types, depth=0):
 
 
 def generate_list(depth=0):
-  list_type = choice(value_types)
+  if depth == 0:
+    list_type = choice(value_types)
+  else:
+    list_type = choice(['string', 'number', 'variable'])
   list_length = int(rand() * 10)
   if depth == 0:
-    list_style = choice(["brackets", "parens", "list of"])
+    list_style = choice(["curly braces", "square brackets", "parens", "list of"])
   else:
-    list_style = choice(["brackets", "parens"])
+    list_style = choice(["curly braces", "square brackets", "parens"])
   list = [ generate_value([ list_type ], depth=(depth + 1)) for _ in range(list_length) ]
 
   real_value = "[" + ", ".join([ rv for _, rv in list ]) + "]"
-  if list_style == 'brackets':
+  if list_style == 'square brackets':
     value = "[" + ", ".join([ v for v, _ in list ]) + "]"
+  elif list_style == 'curly braces':
+    value = "{" + ", ".join([ v for v, _ in list ]) + "}"
   elif list_style == 'parens':
     value = "(" + ", ".join([ v for v, _ in list ]) + ")"
   elif list_style == 'list of':

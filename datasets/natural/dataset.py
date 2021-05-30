@@ -153,7 +153,12 @@ class Natural(object):
         query_tokens = canonical_query.split(' ')
 
         canonical_code = Natural.canonicalize_code(code)
-        ast_tree = ast.parse(canonical_code)
+        try:
+            ast_tree = ast.parse(canonical_code)
+        except Exception as e:
+            print(canonical_code)
+            raise e
+
 
         Natural.canonicalize_str_nodes(ast_tree, str_map)
         canonical_code = astor.to_source(ast_tree)
@@ -199,6 +204,7 @@ class Natural(object):
     @staticmethod
     def parse_natural_dataset(asdl_file_path, max_query_len=70, vocab_freq_cutoff=10):
         asdl_text = open(asdl_file_path).read()
+        print('building grammar')
         grammar = ASDLGrammar.from_text(asdl_text)
         transition_system = Python3TransitionSystem(grammar)
 
@@ -222,7 +228,12 @@ class Natural(object):
         from components.vocab import Vocab, VocabEntry
         from components.dataset import Example
 
+        print('processing examples')
         for idx, (src_query, tgt_code) in enumerate(annotation_codes):
+            if (idx % 100 == 0):
+                sys.stdout.write("\r%s / %s" % (idx, len(annotation_codes)))
+                sys.stdout.flush()
+
             src_query = src_query.strip()
             tgt_code = tgt_code.strip()
 
@@ -232,7 +243,6 @@ class Natural(object):
             gold_source = astor.to_source(python_ast).strip()
             tgt_ast = python_ast_to_asdl_ast(python_ast, transition_system.grammar)
             tgt_actions = transition_system.get_actions(tgt_ast)
-
             # print('+' * 60)
             # print('Example: %d' % idx)
             # print('Source: %s' % ' '.join(src_query_tokens))
@@ -285,6 +295,7 @@ class Natural(object):
 
         action_len = []
 
+        print("\nsplitting train/dev/test")
         for idx, e in enumerate(loaded_examples):
             src_query_tokens = e['src_query_tokens'][:max_query_len]
             tgt_actions = e['tgt_actions']
