@@ -5,8 +5,8 @@ import re
 from nltk import FreqDist
 from nltk.corpus import brown, stopwords
 from numpy.random import rand, choice
-nltk.download('brown')
-nltk.download('stopwords')
+nltk.download('brown', quiet=True)
+nltk.download('stopwords', quiet=True)
 
 templates = [
   "sum #A and #B",

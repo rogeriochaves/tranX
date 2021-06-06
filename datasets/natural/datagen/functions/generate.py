@@ -48,12 +48,15 @@ def generate_params():
 
   return (params_input, params_output, params)
 
-def generate_args():
+def generate_args(variable_to_use=None):
   args_length = choice([0, 1, 1, 1, 2, 2, 2, 3])
   if args_length == 0:
     return ("()", "()")
 
   args = [ generate_value(value_types, depth=1) for _ in range(args_length) ]
+  if variable_to_use is not None and len(args) > 0:
+    args[0] = (variable_to_use, variable_to_use)
+
   args_input = [ x[0] for x in args ]
   args_output = [ x[1] for x in args ]
   args_input = choice(templates_args)(args_input)
@@ -87,9 +90,7 @@ def generate_call_sample(variable_to_use=None):
   template = choice(call_templates)
 
   name = generate_name()
-  if variable_to_use is not None:
-    name = variable_to_use
-  (args_input, args_output) = generate_args()
+  (args_input, args_output) = generate_args(variable_to_use)
 
   input = template.replace("#NAME", name).replace("#ARGS", args_input)
   if args_input[0] == "(" and args_input[-1] == ")":

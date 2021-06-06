@@ -26,8 +26,10 @@ for i in range(1000):
   inputs.append(input)
   outputs.append(output)
 
-def generate_sample():
+def generate_sample(variable_to_use=None):
   name = generate_name()
+  if variable_to_use:
+    name = variable_to_use
   (expr_input, expr_output) = generate_expression_sample()
 
   input = choice(templates).replace("#NAME", name).replace("#VALUE", expr_input)

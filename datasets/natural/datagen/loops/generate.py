@@ -1,5 +1,5 @@
 from datasets.natural.datagen.base_generator import generate_name, generate_value, save_generated
-import datasets.natural.datagen.assignment.generate as assignment
+from datasets.natural.datagen.group_generators import generate_statement_or_expression
 import datasets.natural.datagen.ifs.generate as ifs
 from numpy.random import choice
 
@@ -42,8 +42,7 @@ for i in range(2000):
   max = str(min + choice([0, 1, 5, 10, 50, 100]))
   min = str(min)
   (comparison_input, comparison_output) = ifs.generate_comparison()
-  # TODO: add more expressions?
-  (expr_input, expr_output) = assignment.operations.generate_sample_update()
+  (expr_input, expr_output) = generate_statement_or_expression(variable_to_use=var)
 
   if loop == "for-each":
     input = template.replace("#VAR", var).replace("#LIST", list_input)
