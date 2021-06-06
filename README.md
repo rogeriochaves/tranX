@@ -205,3 +205,9 @@ To generate data:
 ```bash
 PYTHONPATH=. python3 datasets/natural/datagen/generate_all.py
 ```
+
+To run tests:
+
+```bash
+python3 -m unittest tests/test_model_sanity.py
+```

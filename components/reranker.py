@@ -245,7 +245,7 @@ class Reranker(Savable):
 
     def initialize_rerank_features(self, examples, decode_results):
         hyp_examples = []
-        print('initializing features...', file=sys.stderr)
+        # print('initializing features...', file=sys.stderr)
         for example, hyps in zip(examples, decode_results):
             for hyp_id, hyp in enumerate(hyps):
                 hyp_example = Example(idx=None,
@@ -295,9 +295,9 @@ class Reranker(Savable):
             decode_results[i] = valid_hyps
 
     def filter_hyps_and_initialize_features(self, examples, decode_results):
-        print(decode_results[0][0].code)
+        # print(decode_results[0][0].code)
         if not hasattr(decode_results[0][0], 'rerank_feature_values'):
-            print('initializing rerank features for hypotheses...', file=sys.stderr)
+            # print('initializing rerank features for hypotheses...', file=sys.stderr)
 
             def is_valid_hyp(hyp):
                 try:

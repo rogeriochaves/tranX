@@ -5,7 +5,7 @@ import time
 import six
 import argparse
 import sys
-from flask import Flask, url_for, jsonify, render_template, request
+from flask import Flask, jsonify, render_template, request
 import json
 from pymongo import MongoClient
 from components.standalone_parser import StandaloneParser

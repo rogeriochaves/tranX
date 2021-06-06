@@ -40,8 +40,9 @@ class StandaloneParser(object):
     def parse(self, utterance, debug=False):
         utterance = utterance.strip()
         processed_utterance_tokens, utterance_meta = self.example_processor.pre_process_utterance(utterance)
-        print(processed_utterance_tokens)
-        print(utterance_meta)
+        if debug:
+            print(processed_utterance_tokens)
+            print(utterance_meta)
         examples = [Example(idx=None,
                           src_sent=processed_utterance_tokens,
                           tgt_code=None,
@@ -57,13 +58,14 @@ class StandaloneParser(object):
         for hyp in valid_hypotheses:
             self.example_processor.post_process_hypothesis(hyp, utterance_meta)
 
-        for hyp_id, hyp in enumerate(valid_hypotheses):
-            print('------------------ Hypothesis %d ------------------' % hyp_id)
-            print(hyp.code)
-            print(hyp.tree.to_string())
-            print('Actions:')
-            for action_t in hyp.action_infos:
-                print(action_t.action)
+        if debug:
+            for hyp_id, hyp in enumerate(valid_hypotheses):
+                print('------------------ Hypothesis %d ------------------' % hyp_id)
+                print(hyp.code)
+                print(hyp.tree.to_string())
+                print('Actions:')
+                for action_t in hyp.action_infos:
+                    print(action_t.action)
 
         return valid_hypotheses
 
