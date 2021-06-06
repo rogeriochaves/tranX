@@ -23,3 +23,10 @@ def generate_expression_sample(variable_to_use=None):
     return functions.generate_call_sample(variable_to_use)
 
   raise Exception()
+
+
+def generate_statement_or_expression():
+  if choice(["statement", "expression"]) == "statement":
+    return generate_statement_sample()
+  else:
+    return generate_expression_sample()

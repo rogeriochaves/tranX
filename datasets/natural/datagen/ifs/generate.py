@@ -1,5 +1,5 @@
 from datasets.natural.datagen.base_generator import generate_value, save_generated
-from datasets.natural.datagen.group_generators import generate_statement_sample
+from datasets.natural.datagen.group_generators import generate_statement_or_expression
 import datasets.natural.datagen.operations.generate as operations
 from numpy.random import choice
 
@@ -85,8 +85,8 @@ for i in range(2000):
   (comparison_input, comparison_output) = generate_comparison()
   (condition_input, condition_output) = condition_templates[choice(len(condition_templates))]
 
-  (case_true_input, case_true_output) = generate_statement_sample()
-  (case_false_input, case_false_output) = generate_statement_sample()
+  (case_true_input, case_true_output) = generate_statement_or_expression()
+  (case_false_input, case_false_output) = generate_statement_or_expression()
 
   input = condition_input.replace("#COND", comparison_input).replace("#CASE_TRUE", case_true_input).replace("#CASE_FALSE", case_false_input)
   output = condition_output.replace("#COND", comparison_output).replace("#CASE_TRUE", case_true_output).replace("#CASE_FALSE", case_false_output)
