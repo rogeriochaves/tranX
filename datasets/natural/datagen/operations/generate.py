@@ -88,7 +88,7 @@ def generate_sample_update(variable_to_use=None):
   if "square" in input:
     output = "%s **= 2" % name
   elif operation == "++":
-    output = "%s++" % name
+    output = "%s += 1" % name
   else:
     output = "%s %s= %s" % (name, operation, real_value)
 
