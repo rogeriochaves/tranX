@@ -1,4 +1,5 @@
 from datasets.natural.datagen.base_generator import generate_name, generate_value, save_generated
+from datasets.natural.datagen.group_generators import generate_expression_sample
 from numpy.random import choice
 
 templates = {
@@ -32,8 +33,22 @@ update_templates = {
   "/": ["#NAME /= #VALUE",
         "divide #NAME by #VALUE"],
   "**": ["raise #NAME to the power of #VALUE",
-         "square #NAME"]
+         "square #NAME"],
+  "++": ["#NAME++",
+        "increment #NAME"],
 }
+
+def generate_value_or_nested(possible_types):
+  nested = choice(["single", "single", "single", "nested", "parens_nested"])
+  if nested == "single":
+    return generate_value(possible_types)
+  elif nested == "nested":
+    return generate_expression_sample()
+  elif nested == "parens_nested":
+    (input, output) = generate_sample()
+    return ("(" + input + ")", "(" + output + ")")
+  raise Exception()
+
 
 def generate_sample(variable_to_use=None):
   operation = choice(list(templates.keys()))
@@ -44,9 +59,8 @@ def generate_sample(variable_to_use=None):
   if 'add' in template or '+' in template:
     possible_types += ['string']
 
-  (a, a_value) = generate_value(possible_types)
-  (b, b_value) = generate_value(possible_types)
-
+  (a, a_value) = generate_value_or_nested(possible_types)
+  (b, b_value) = generate_value_or_nested(possible_types)
   if variable_to_use is not None:
     a = a_value = variable_to_use
 
@@ -73,6 +87,8 @@ def generate_sample_update(variable_to_use=None):
   input = template.replace("#NAME", name).replace("#VALUE", value)
   if "square" in input:
     output = "%s **= 2" % name
+  elif operation == "++":
+    output = "%s++" % name
   else:
     output = "%s %s= %s" % (name, operation, real_value)
 

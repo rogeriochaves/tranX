@@ -1,7 +1,7 @@
 from datasets.natural.datagen.base_generator import generate_name, generate_value, save_generated
 from datasets.natural.datagen.group_generators import generate_statement_or_expression
 import datasets.natural.datagen.ifs.generate as ifs
-from numpy.random import choice
+from numpy.random import choice, rand
 
 templates = {
   "for-each": ["for #VAR in #LIST",
@@ -39,8 +39,8 @@ for i in range(2000):
   var = generate_name()
   (list_input, list_output) = generate_value(['variable', 'list'])
   min = choice([0, 1, 5, 10])
-  max = str(min + choice([0, 1, 5, 10, 50, 100]))
-  min = str(min)
+  max = str(min + choice([1, 5, 10, 50, 100])) if rand() < 0.5 else generate_name()
+  min = str(min) if rand() < 0.9 else generate_name()
   (comparison_input, comparison_output) = ifs.generate_comparison()
   (expr_input, expr_output) = generate_statement_or_expression(variable_to_use=var)
 

@@ -1,6 +1,6 @@
-from datasets.natural.datagen.base_generator import generate_value, save_generated
-from datasets.natural.datagen.group_generators import generate_statement_or_expression
-import datasets.natural.datagen.operations.generate as operations
+from datasets.natural.datagen.base_generator import save_generated
+from datasets.natural.datagen.group_generators import generate_statement_or_expression, generate_value_or_expression
+import datasets.natural.datagen.assignment.generate as assignment
 from numpy.random import choice
 
 templates = {
@@ -28,12 +28,16 @@ composition_templates = {
 }
 
 condition_templates = [
+  ("#COND", "#COND"),
+  ("#COND", "#COND"),
   ("if #COND", "if #COND:"),
   ("if #COND", "if #COND:"),
   ("if #COND", "if #COND:"),
   ("#CASE_TRUE if #COND", "if #COND:\\n  #CASE_TRUE"),
   ("#CASE_TRUE if #COND", "if #COND:\\n  #CASE_TRUE"),
   ("#CASE_TRUE if #COND", "if #COND:\\n  #CASE_TRUE"),
+  ("#ASSIGNMENT if #COND else #VAL_FALSE", "#ASSIGNMENT if #COND else #VAL_FALSE"),
+  ("#ASSIGNMENT if #COND else #VAL_FALSE", "#ASSIGNMENT if #COND else #VAL_FALSE"),
   ("if not #COND", "if not #COND:"),
   ("if not #COND", "if not #COND:"),
   ("#CASE_TRUE if #COND else #CASE_FALSE", "if #COND:\\n  #CASE_TRUE\\nelse:\\n  #CASE_FALSE"),
@@ -45,18 +49,11 @@ condition_templates = [
 ]
 
 
-def generate_value_or_operation():
-  if choice(["value", "operation"]) == "value":
-    return generate_value()
-  else:
-    return operations.generate_sample()
-
-
 def generate_comparison():
   comparison = choice(list(templates.keys()))
   template = choice(templates[comparison])
-  (a, a_value) = generate_value_or_operation()
-  (b, b_value) = generate_value_or_operation()
+  (a, a_value) = generate_value_or_expression()
+  (b, b_value) = generate_value_or_expression()
 
   comparison_input = template.replace("#A", a).replace("#B", b)
   comparison_output = "%s %s %s" % (a_value, comparison, b_value)
@@ -88,8 +85,21 @@ for i in range(2000):
   (case_true_input, case_true_output) = generate_statement_or_expression()
   (case_false_input, case_false_output) = generate_statement_or_expression()
 
-  input = condition_input.replace("#COND", comparison_input).replace("#CASE_TRUE", case_true_input).replace("#CASE_FALSE", case_false_input)
-  output = condition_output.replace("#COND", comparison_output).replace("#CASE_TRUE", case_true_output).replace("#CASE_FALSE", case_false_output)
+  (assignment_input, assignment_ouput) = assignment.generate_sample()
+  (val_false_input, val_false_output) = generate_value_or_expression()
+
+  input = (condition_input
+            .replace("#COND", comparison_input)
+            .replace("#CASE_TRUE", case_true_input)
+            .replace("#CASE_FALSE", case_false_input)
+            .replace("#ASSIGNMENT", assignment_input)
+            .replace("#VAL_FALSE", val_false_input))
+  output = (condition_output
+            .replace("#COND", comparison_output)
+            .replace("#CASE_TRUE", case_true_output)
+            .replace("#CASE_FALSE", case_false_output)
+            .replace("#ASSIGNMENT", assignment_ouput)
+            .replace("#VAL_FALSE", val_false_output))
 
   inputs.append(input)
   outputs.append(output)

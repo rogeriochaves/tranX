@@ -1,4 +1,5 @@
 from numpy.random import choice
+from datasets.natural.datagen.base_generator import generate_value
 
 
 def generate_statement_sample(variable_to_use=None):
@@ -30,3 +31,10 @@ def generate_statement_or_expression(variable_to_use=None):
     return generate_statement_sample(variable_to_use)
   else:
     return generate_expression_sample(variable_to_use)
+
+
+def generate_value_or_expression():
+  if choice(["value", "expression"]) == "value":
+    return generate_value()
+  else:
+    return generate_expression_sample()
