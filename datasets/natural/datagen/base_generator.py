@@ -55,7 +55,10 @@ def generate_value(possible_types=value_types, depth=0):
   if value_type == 'string':
     value = real_value = generate_string()
   elif value_type == 'number':
-    value = real_value = choice(numbers)
+    if choice(['int', 'int', 'float']) == 'int':
+      value = real_value = choice(numbers)
+    else:
+      value = real_value = choice(numbers) / choice([10, 100])
   elif value_type == 'written_number':
     value = choice(numbers_written)
     real_value = numbers_written.index(value)
