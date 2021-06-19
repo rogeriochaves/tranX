@@ -1,8 +1,10 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, Dispatch, Props } from "react";
 import Row from "./components/Row";
 import useWindowDimensions from "./utils/useWindowDimensions";
+import type { State, Action } from "./state";
 
 function Canvas(props: {
+  state: State;
   parentHeight: string;
   textAreaRef: React.Ref<HTMLTextAreaElement>;
   textAreaHeight: string;
@@ -23,6 +25,7 @@ function Canvas(props: {
     >
       <textarea
         className="canvas-textarea"
+        data-testid="canvas-textarea"
         ref={props.textAreaRef}
         rows={1}
         style={{
@@ -34,15 +37,16 @@ function Canvas(props: {
         }}
         onChange={props.onChangeHandler}
         placeholder="type some code..."
+        value={props.state.text}
       />
     </div>
   );
 }
 
 function Results(props: {
+  state: State;
   parentHeight: string;
   fontSize: number;
-  text: string;
   lineHeight: number;
 }) {
   return (
@@ -56,7 +60,7 @@ function Results(props: {
         paddingLeft: 30,
       }}
     >
-      {props.text.split("\n").map((line: string, index) => (
+      {props.state.text.split("\n").map((line: string, index) => (
         <div
           key={index}
           className="results-item"
@@ -72,10 +76,12 @@ function Results(props: {
   );
 }
 
-export default function Editor() {
+export default function Editor(props: {
+  state: State;
+  dispatch: Dispatch<Action>;
+}) {
   const windowDimensions = useWindowDimensions();
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
-  const [text, setText] = useState("");
   const [textAreaHeight, setTextAreaHeight] = useState("auto");
   const [parentHeight, setParentHeight] = useState("auto");
 
@@ -94,7 +100,7 @@ export default function Editor() {
     setTextAreaHeight(`${getTextAreaHeight()}px`);
   };
 
-  useEffect(setCanvasHeight, [text]);
+  useEffect(setCanvasHeight, [props.state.text]);
 
   useEffect(() => {
     setTextAreaHeight("auto");
@@ -103,7 +109,7 @@ export default function Editor() {
 
   const onChangeHandler = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     setTextAreaHeight("auto");
-    setText(event.target.value);
+    props.dispatch({ type: "SET_TEXT", value: event.target.value });
   };
 
   return (
@@ -114,6 +120,7 @@ export default function Editor() {
       ></div>
       <Row style={{ maxWidth: 1200, margin: "0 auto" }}>
         <Canvas
+          state={props.state}
           textAreaRef={textAreaRef}
           textAreaHeight={textAreaHeight}
           parentHeight={parentHeight}
@@ -122,7 +129,7 @@ export default function Editor() {
           lineHeight={lineHeight}
         />
         <Results
-          text={text}
+          state={props.state}
           parentHeight={parentHeight}
           fontSize={fontSize}
           lineHeight={lineHeight}

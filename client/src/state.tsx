@@ -1,18 +1,16 @@
-// interface State {
-//     text: string
-// }
+export interface State {
+  text: string;
+}
 
-// const initialState = {
+export const initialState: State = {
+  text: "",
+};
 
-// };
+export type Action = { type: "SET_TEXT"; value: string };
 
-// function reducer(state, action: { type: string }) {
-//   switch (action.type) {
-//     case "increment":
-//       return { count: state.count + 1 };
-//     case "decrement":
-//       return { count: state.count - 1 };
-//     default:
-//       throw new Error();
-//   }
-// }
+export function reducer(_state: State, action: Action): State {
+  switch (action.type) {
+    case "SET_TEXT":
+      return { text: action.value };
+  }
+}
