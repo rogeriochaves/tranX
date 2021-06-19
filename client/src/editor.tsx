@@ -4,7 +4,7 @@ import useWindowDimensions from "./utils/useWindowDimensions";
 
 function Canvas(props: {
   parentHeight: string;
-  textAreaRef: React.LegacyRef<HTMLTextAreaElement>;
+  textAreaRef: React.Ref<HTMLTextAreaElement>;
   textAreaHeight: string;
   fontSize: number;
   lineHeight: number;
@@ -56,8 +56,9 @@ function Results(props: {
         paddingLeft: 30,
       }}
     >
-      {props.text.split("\n").map((line: string) => (
+      {props.text.split("\n").map((line: string, index) => (
         <div
+          key={index}
           className="results-item"
           style={{
             height: props.fontSize * props.lineHeight,
