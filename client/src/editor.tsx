@@ -2,7 +2,14 @@ import React, { useState, useEffect, useRef } from "react";
 import Row from "./components/Row";
 import useWindowDimensions from "./utils/useWindowDimensions";
 
-function Canvas(props) {
+function Canvas(props: {
+  parentHeight: string;
+  textAreaRef: React.LegacyRef<HTMLTextAreaElement>;
+  textAreaHeight: string;
+  fontSize: number;
+  lineHeight: number;
+  onChangeHandler: React.ChangeEventHandler<HTMLTextAreaElement>;
+}) {
   return (
     <div
       className="canvas"
@@ -32,7 +39,12 @@ function Canvas(props) {
   );
 }
 
-function Results(props) {
+function Results(props: {
+  parentHeight: string;
+  fontSize: number;
+  text: string;
+  lineHeight: number;
+}) {
   return (
     <div
       className="results"
@@ -44,7 +56,7 @@ function Results(props) {
         paddingLeft: 30,
       }}
     >
-      {props.split("\n").map((line) => (
+      {props.text.split("\n").map((line: string) => (
         <div
           className="results-item"
           style={{
@@ -109,7 +121,7 @@ export default function Editor() {
           lineHeight={lineHeight}
         />
         <Results
-          split={text.split}
+          text={text}
           parentHeight={parentHeight}
           fontSize={fontSize}
           lineHeight={lineHeight}
