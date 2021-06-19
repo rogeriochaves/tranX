@@ -1,0 +1,3 @@
+set total to 0
+add 1 to total while total is smaller than 100
+print total
