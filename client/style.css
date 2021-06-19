@@ -1,0 +1,39 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background: rgb(248, 249, 250);
+  font-size: 14px;
+  margin: 0;
+  padding: 0;
+  color: #111;
+}
+
+.topbar {
+  background: rgb(131, 29, 29);
+}
+
+.canvas {
+  background: #fff;
+  box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+.canvas-textarea {
+  font-family: Garamond;
+  resize: none;
+  outline: none;
+  border: 0;
+}
+
+.results {
+  font-family: Garamond;
+  font-size: 20px;
+  color: #555;
+}
+
+.results-item {
+  text-overflow: ellipsis;
+  overflow-x: hidden;
+  white-space: nowrap;
+}
