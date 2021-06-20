@@ -1,7 +1,7 @@
 import type { queries } from "@testing-library/dom";
 import { render, RenderResult } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { expect } from "chai";
+import { expect } from "./utils/testing";
 import React, { useReducer } from "react";
 import Editor from "./Editor";
 import { initialState, reducer } from "./state";
@@ -40,8 +40,7 @@ describe("<Editor>", () => {
 
     const results = await wrapper.findByTestId("results");
 
-    // TODO: use sinon-chai here for better assertions
-    expect(postCall.calledWith("/run", { code: "1 + 1" })).ok;
+    expect(postCall).calledWith("/run", { code: "1 + 1" });
     expect(results.textContent).contains("2");
   });
 });
