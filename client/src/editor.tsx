@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, Dispatch, Props } from "react";
 import Row from "./components/Row";
 import useWindowDimensions from "./utils/useWindowDimensions";
+import axios from "axios";
 import type { State, Action } from "./state";
 
 function Canvas(props: {
@@ -52,6 +53,7 @@ function Results(props: {
   return (
     <div
       className="results"
+      data-testid="results"
       style={{
         width: "100%",
         maxWidth: 400,
@@ -60,7 +62,7 @@ function Results(props: {
         paddingLeft: 30,
       }}
     >
-      {props.state.text.split("\n").map((line: string, index) => (
+      {props.state.results.map((result: string, index) => (
         <div
           key={index}
           className="results-item"
@@ -69,7 +71,7 @@ function Results(props: {
             lineHeight: `${props.fontSize}px`,
           }}
         >
-          {line}
+          {result}
         </div>
       ))}
     </div>
@@ -108,8 +110,14 @@ export default function Editor(props: {
   }, [windowDimensions]);
 
   const onChangeHandler = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const text = event.target.value;
+
     setTextAreaHeight("auto");
-    props.dispatch({ type: "SET_TEXT", value: event.target.value });
+    props.dispatch({ type: "SET_TEXT", value: text });
+
+    axios.post("/run", { code: text }).then((response) => {
+      props.dispatch({ type: "UPDATE_RESULTS", results: [response.data] });
+    });
   };
 
   return (

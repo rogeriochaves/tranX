@@ -1,9 +1,12 @@
-import { render } from "@testing-library/react";
+import type { queries } from "@testing-library/dom";
+import { render, RenderResult } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { expect } from "chai";
-import Editor from "./Editor";
 import React, { useReducer } from "react";
-import { reducer, initialState } from "./state";
+import Editor from "./Editor";
+import { initialState, reducer } from "./state";
+import type { SinonStub } from "sinon";
+import axios from "axios";
 
 function TestWrapper() {
   const [state, dispatch] = useReducer(reducer, initialState);
@@ -11,14 +14,34 @@ function TestWrapper() {
 }
 
 describe("<Editor>", () => {
-  it("displays the text typed on the canvas", async () => {
-    const wrapper = render(<TestWrapper />);
+  const postCall = axios.post as SinonStub;
+  let wrapper: RenderResult<typeof queries, HTMLElement>;
+  let canvas: HTMLInputElement;
 
-    const canvas = (await wrapper.findByTestId(
+  beforeEach(async () => {
+    wrapper = render(<TestWrapper />);
+
+    canvas = (await wrapper.findByTestId(
       "canvas-textarea"
     )) as HTMLInputElement;
+  });
+
+  it("displays the text typed on the canvas", async () => {
+    postCall.returns(Promise.resolve({ data: "" }));
 
     userEvent.type(canvas, "set x to 1{enter}x + 1");
     expect(canvas.value).contains("set x to 1\nx + 1");
+  });
+
+  it("renders the result from the backend for each line", async () => {
+    postCall.returns(Promise.resolve({ data: "2" }));
+
+    userEvent.type(canvas, "1 + 1{enter}");
+
+    const results = await wrapper.findByTestId("results");
+
+    // TODO: use sinon-chai here for better assertions
+    expect(postCall.calledWith("/run", { code: "1 + 1" })).ok;
+    expect(results.textContent).contains("2");
   });
 });
