@@ -78,6 +78,33 @@ function Results(props: {
   );
 }
 
+interface ParseCall {
+  line: string;
+  timeout: number;
+}
+
+let parseCalls: Array<ParseCall> = [];
+function runDebouncedParse(text: string, dispatch: Dispatch<Action>) {
+  const lines = text.split("\n");
+  for (const lineNumber in lines) {
+    const line = lines[lineNumber];
+    if (line.trim().length == 0) continue; // TODO: set line to empty
+    if (parseCalls[lineNumber]?.line == line) continue;
+
+    clearTimeout(parseCalls[lineNumber]?.timeout);
+    const timeout = setTimeout(() => {
+      axios.get("/api/parse", { params: { code: line } }).then((response) => {
+        // TODO: update line by index
+        if (line == parseCalls[lineNumber]?.line) {
+          dispatch({ type: "UPDATE_RESULTS", results: [response.data] });
+        }
+      });
+    }, 500);
+
+    parseCalls[lineNumber] = { line, timeout };
+  }
+}
+
 export default function Editor(props: {
   state: State;
   dispatch: Dispatch<Action>;
@@ -115,9 +142,7 @@ export default function Editor(props: {
     setTextAreaHeight("auto");
     props.dispatch({ type: "SET_TEXT", value: text });
 
-    axios.get("/api/parse", { params: { code: text } }).then((response) => {
-      props.dispatch({ type: "UPDATE_RESULTS", results: [response.data] });
-    });
+    runDebouncedParse(text, props.dispatch);
   };
 
   return (

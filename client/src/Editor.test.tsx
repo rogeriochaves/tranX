@@ -5,8 +5,9 @@ import { expect } from "./utils/testing";
 import React, { useReducer } from "react";
 import Editor from "./Editor";
 import { initialState, reducer } from "./state";
-import type { SinonStub } from "sinon";
+import { SinonFakeTimers, SinonStub, useFakeTimers } from "sinon";
 import axios from "axios";
+import sleep from "./utils/sleep";
 
 function TestWrapper() {
   const [state, dispatch] = useReducer(reducer, initialState);
@@ -17,13 +18,21 @@ describe("<Editor>", () => {
   const axiosGET = axios.get as SinonStub;
   let wrapper: RenderResult<typeof queries, HTMLElement>;
   let canvas: HTMLInputElement;
+  let clock: SinonFakeTimers;
 
   beforeEach(async () => {
+    clock = useFakeTimers();
+
     wrapper = render(<TestWrapper />);
 
     canvas = (await wrapper.findByTestId(
       "canvas-textarea"
     )) as HTMLInputElement;
+  });
+
+  afterEach(() => {
+    axiosGET.reset();
+    clock.restore();
   });
 
   it("displays the text typed on the canvas", async () => {
@@ -38,9 +47,65 @@ describe("<Editor>", () => {
 
     userEvent.type(canvas, "one plus one{enter}");
 
+    clock.tick(500); // input debounce time
+
     const results = await wrapper.findByTestId("results");
 
-    expect(axiosGET).calledWith("/api/parse", { params: { code: "one plus one" } });
+    expect(axiosGET).calledWith("/api/parse", {
+      params: { code: "one plus one" },
+    });
     expect(results.textContent).contains("1 + 1");
+  });
+
+  it("has a debounce when typing", async () => {
+    axiosGET.returns(Promise.resolve({ data: "1 +" }));
+    userEvent.type(canvas, "one plus");
+
+    expect(axiosGET).callCount(0);
+    clock.tick(500);
+    expect(axiosGET).callCount(1);
+    userEvent.type(canvas, " one");
+    clock.tick(500);
+    expect(axiosGET).callCount(2);
+  });
+
+  it("does not make a call to parse empty lines", async () => {
+    axiosGET.returns(Promise.resolve({ data: "1 +" }));
+    userEvent.type(canvas, "one plus one{enter} {enter}two plus two");
+
+    clock.tick(500);
+
+    expect(axiosGET).callCount(2);
+    expect(axiosGET).calledWith("/api/parse", {
+      params: { code: "one plus one" },
+    });
+    expect(axiosGET).calledWith("/api/parse", {
+      params: { code: "two plus two" },
+    });
+  });
+
+  it("uses only the last requested parsing if there is a race condition", async () => {
+    axiosGET.onFirstCall().callsFake(async () => {
+      await sleep(800);
+      return { data: "first result" };
+    });
+    axiosGET.onSecondCall().callsFake(async () => {
+      await sleep(100);
+      return { data: "second result" };
+    });
+
+    userEvent.type(canvas, "one plus");
+    clock.tick(500);
+    userEvent.type(canvas, " one");
+    clock.tick(600);
+
+    let results = await wrapper.findByTestId("results");
+    expect(results.textContent).contains("second result");
+
+    clock.tick(200); // first result loads after the second
+
+    results = await wrapper.findByTestId("results");
+    expect(results.textContent).contains("second result");
+    expect(results.textContent).not.contains("first result");
   });
 });
