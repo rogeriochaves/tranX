@@ -1,4 +1,12 @@
 import proxy from "http2-proxy";
+import finalhandler from "finalhandler";
+
+const defaultWebHandler = (err, req, res) => {
+  if (err) {
+    console.error("proxy error", err);
+    finalhandler(req, res)(err);
+  }
+};
 
 // Snowpack Configuration File
 // See all supported options: https://www.snowpack.dev/reference/configuration
@@ -12,12 +20,16 @@ export default {
   routes: [
     {
       src: "/api/.*",
-      dest: (req, res) => {
-        return proxy.web(req, res, {
-          hostname: "localhost",
-          port: 8081,
-        });
-      },
+      dest: (req, res) =>
+        proxy.web(
+          req,
+          res,
+          {
+            hostname: "localhost",
+            port: 8081,
+          },
+          defaultWebHandler
+        ),
     },
   ],
 };
