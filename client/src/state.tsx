@@ -10,13 +10,15 @@ export const initialState: State = {
 
 export type Action =
   | { type: "SET_TEXT"; value: string }
-  | { type: "UPDATE_RESULTS"; results: Array<string> };
+  | { type: "UPDATE_RESULTS"; index: number; result: string };
 
 export function reducer(state: State, action: Action): State {
   switch (action.type) {
     case "SET_TEXT":
       return { ...state, text: action.value };
     case "UPDATE_RESULTS":
-      return { ...state, results: action.results };
+      const results = [...state.results];
+      results[action.index] = action.result;
+      return { ...state, results };
   }
 }

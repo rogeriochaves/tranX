@@ -108,4 +108,17 @@ describe("<Editor>", () => {
     expect(results.textContent).contains("second result");
     expect(results.textContent).not.contains("first result");
   });
+
+  it("shows the results for each line typed", async () => {
+    axiosGET.onFirstCall().returns(Promise.resolve({ data: "1 + 1" }));
+    axiosGET.onSecondCall().returns(Promise.resolve({ data: "2 + 2" }));
+
+    userEvent.type(canvas, "one plus one{enter}two plus two");
+
+    clock.tick(500); // input debounce time
+
+    const results = await wrapper.findByTestId("results");
+    expect(results.textContent).contains("1 + 1");
+    expect(results.textContent).contains("2 + 2");
+  });
 });

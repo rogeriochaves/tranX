@@ -94,10 +94,13 @@ function runDebouncedParse(text: string, dispatch: Dispatch<Action>) {
     clearTimeout(parseCalls[lineNumber]?.timeout);
     const timeout = setTimeout(() => {
       axios.get("/api/parse", { params: { code: line } }).then((response) => {
-        // TODO: update line by index
-        if (line == parseCalls[lineNumber]?.line) {
-          dispatch({ type: "UPDATE_RESULTS", results: [response.data] });
-        }
+        if (line != parseCalls[lineNumber]?.line) return;
+
+        dispatch({
+          type: "UPDATE_RESULTS",
+          index: parseInt(lineNumber),
+          result: response.data,
+        });
       });
     }, 500);
 
