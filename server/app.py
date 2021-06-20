@@ -23,8 +23,8 @@ def default():
     return render_template('default.html')
 
 
-@app.route('/parse/<dataset>', methods=['GET'])
-def parse(dataset):
+@app.route('/debug/parse/<dataset>', methods=['GET'])
+def debug_parse(dataset):
     utterance = request.args['q']
 
     parser = parsers[dataset]
@@ -75,13 +75,12 @@ def upload():
         return "failed"
 
 
-@app.route("/run", methods=['POST'])
-def run():
-    input = request.get_json()["code"]
+@app.route("/api/parse", methods=['GET'])
+def parse():
+    input = request.args['code']
     hypotheses = parsers["natural"].parse(input)
     output = hypotheses[0].code
-    # TODO: make this safe !important
-    return str(eval(output))
+    return output
 
 
 config_dict = json.load(open(path.join(root, 'config', 'server', 'config_py3.json')))

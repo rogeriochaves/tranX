@@ -11,7 +11,7 @@ export default {
   plugins: ["@snowpack/plugin-typescript"],
   routes: [
     {
-      src: "/run",
+      src: "/api/.*",
       dest: (req, res) => {
         return proxy.web(req, res, {
           hostname: "localhost",

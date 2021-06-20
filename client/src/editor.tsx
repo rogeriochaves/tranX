@@ -115,7 +115,7 @@ export default function Editor(props: {
     setTextAreaHeight("auto");
     props.dispatch({ type: "SET_TEXT", value: text });
 
-    axios.post("/run", { code: text }).then((response) => {
+    axios.get("/api/parse", { params: { code: text } }).then((response) => {
       props.dispatch({ type: "UPDATE_RESULTS", results: [response.data] });
     });
   };

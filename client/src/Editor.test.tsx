@@ -14,7 +14,7 @@ function TestWrapper() {
 }
 
 describe("<Editor>", () => {
-  const postCall = axios.post as SinonStub;
+  const axiosGET = axios.get as SinonStub;
   let wrapper: RenderResult<typeof queries, HTMLElement>;
   let canvas: HTMLInputElement;
 
@@ -27,20 +27,20 @@ describe("<Editor>", () => {
   });
 
   it("displays the text typed on the canvas", async () => {
-    postCall.returns(Promise.resolve({ data: "" }));
+    axiosGET.returns(Promise.resolve({ data: "" }));
 
     userEvent.type(canvas, "set x to 1{enter}x + 1");
     expect(canvas.value).contains("set x to 1\nx + 1");
   });
 
   it("renders the result from the backend for each line", async () => {
-    postCall.returns(Promise.resolve({ data: "2" }));
+    axiosGET.returns(Promise.resolve({ data: "1 + 1" }));
 
-    userEvent.type(canvas, "1 + 1{enter}");
+    userEvent.type(canvas, "one plus one{enter}");
 
     const results = await wrapper.findByTestId("results");
 
-    expect(postCall).calledWith("/run", { code: "1 + 1" });
-    expect(results.textContent).contains("2");
+    expect(axiosGET).calledWith("/api/parse", { params: { code: "one plus one" } });
+    expect(results.textContent).contains("1 + 1");
   });
 });

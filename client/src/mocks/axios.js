@@ -1,7 +1,9 @@
 import { stub } from "sinon";
 
 export default {
-  // TODO: tell which url we forgot to mock
+  get: stub().callsFake((url) =>
+    Promise.reject(`GET request for ${url} not mocked`)
+  ),
   post: stub().callsFake((url) =>
     Promise.reject(`POST request for ${url} not mocked`)
   ),

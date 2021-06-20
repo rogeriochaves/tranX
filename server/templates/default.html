@@ -159,7 +159,7 @@
             $('#btn_parse').html(loadingText);
             input_utterance = $('#inputUtterance').val();
             dataset = $('#sel_dataset option:selected').val();
-            post_url = '/parse/' + dataset;
+            post_url = '/debug/parse/' + dataset;
 
             $.get(post_url, {q: input_utterance}, function(data){
                 hypotheses = data['hypotheses'];
