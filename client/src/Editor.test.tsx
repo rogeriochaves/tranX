@@ -16,6 +16,8 @@ function TestWrapper() {
 
 describe("<Editor>", () => {
   const axiosGET = axios.get as SinonStub;
+  const axiosPOST = axios.post as SinonStub;
+
   let wrapper: RenderResult<typeof queries, HTMLElement>;
   let canvas: HTMLInputElement;
   let clock: SinonFakeTimers;
@@ -120,5 +122,25 @@ describe("<Editor>", () => {
     const results = await wrapper.findByTestId("results");
     expect(results.textContent).contains("1 + 1");
     expect(results.textContent).contains("2 + 2");
+  });
+
+  it("executed the code when clicking the run button", async () => {
+    axiosGET.onFirstCall().returns(Promise.resolve({ data: "foo = 1 + 1" }));
+    axiosGET.onSecondCall().returns(Promise.resolve({ data: "print(foo)" }));
+
+    userEvent.type(canvas, "set foo to one plus one{enter}print foo");
+
+    clock.tick(500); // input debounce time
+
+    axiosPOST.returns(Promise.resolve({ data: "2\n" }));
+
+    const runButton = await wrapper.findByTestId("run-code");
+    userEvent.click(runButton);
+
+    const output = await wrapper.findByTestId("output");
+    expect(output.textContent).contains("2");
+    expect(axiosPOST).calledWith("/api/execute", {
+      code: "foo = 1 + 1\nprint(foo)",
+    });
   });
 });

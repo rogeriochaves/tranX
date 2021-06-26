@@ -1,4 +1,5 @@
 from __future__ import print_function
+import builtins
 
 import time
 
@@ -13,6 +14,9 @@ from flask import Flask, jsonify, render_template, request
 import json
 from pymongo import MongoClient
 from components.standalone_parser import StandaloneParser
+import RestrictedPython
+from RestrictedPython import compile_restricted, safe_builtins, limited_builtins, utility_builtins
+from RestrictedPython.PrintCollector import PrintCollector
 
 app = Flask(__name__)
 parsers = dict()
@@ -82,6 +86,22 @@ def parse():
     output = hypotheses[0].code
     return output
 
+
+@app.route("/api/execute", methods=['POST'])
+def execute():
+    output = {}
+    code = request.get_json()['code'] + "\noutput['printed'] = printed"
+    byte_code = compile_restricted(code, '<string>', mode='exec')
+
+    builtins = dict(safe_builtins)
+    builtins["_print_"] = PrintCollector
+    builtins["_write_"] = lambda x: x
+    builtins["_inplacevar_"] = lambda op, val, expr: eval(str(val) + op.replace("=", "") + str(expr))
+    builtins["_getiter_"] = RestrictedPython.Eval.default_guarded_getiter
+
+    exec(byte_code, {'__builtins__': builtins}, {"output": output})
+
+    return output['printed']
 
 config_dict = json.load(open(path.join(root, 'config', 'server', 'config_py3.json')))
 for parser_id, config in config_dict.items():

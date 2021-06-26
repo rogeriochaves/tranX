@@ -6,3 +6,4 @@ numpy
 nltk
 xgboost
 python-rex
+RestrictedPython

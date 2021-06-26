@@ -13,6 +13,16 @@ function Canvas(props: {
   lineHeight: number;
   onChangeHandler: React.ChangeEventHandler<HTMLTextAreaElement>;
 }) {
+  const [output, setOutput] = useState("");
+
+  const runCode = () => {
+    axios
+      .post("/api/execute", { code: props.state.results.join("\n") })
+      .then((response) => {
+        setOutput(response.data);
+      });
+  };
+
   return (
     <div
       className="canvas"
@@ -40,6 +50,18 @@ function Canvas(props: {
         placeholder="type some code..."
         value={props.state.text}
       />
+      <div
+        style={{
+          position: "absolute",
+          left: "30px",
+          top: 50 + props.state.text.split("\n").length * 60 + "px",
+        }}
+      >
+        <button data-testid="run-code" onClick={runCode}>
+          Run Code
+        </button>
+        <div data-testid="output">{output}</div>
+      </div>
     </div>
   );
 }
