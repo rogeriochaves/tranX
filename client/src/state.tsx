@@ -1,6 +1,8 @@
+import type { RemoteData } from "./utils/remoteData";
+
 export interface State {
   text: string;
-  results: Array<string>;
+  results: Array<RemoteData<string> | undefined>;
 }
 
 export const initialState: State = {
@@ -10,7 +12,7 @@ export const initialState: State = {
 
 export type Action =
   | { type: "SET_TEXT"; value: string }
-  | { type: "UPDATE_RESULTS"; index: number; result: string };
+  | { type: "UPDATE_RESULTS"; index: number; result: RemoteData<string> };
 
 export function reducer(state: State, action: Action): State {
   switch (action.type) {

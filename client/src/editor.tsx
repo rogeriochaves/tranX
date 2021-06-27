@@ -3,6 +3,7 @@ import Row from "./components/Row";
 import useWindowDimensions from "./utils/useWindowDimensions";
 import axios from "axios";
 import type { State, Action } from "./state";
+import { Failure, Loading, RemoteData, Success } from "./utils/remoteData";
 
 function Canvas(props: {
   state: State;
@@ -15,15 +16,24 @@ function Canvas(props: {
 }) {
   const [output, setOutput] = useState("");
 
-  const runCode = () => {
-    axios
-      .post("/api/execute", { code: props.state.results.join("\n") })
-      .then((response) => {
-        setOutput(response.data);
-      });
-  };
+  const runCodeButtonDisabled = props.state.results.some(
+    (x) => x?.state != "SUCCESS"
+  );
 
-  const runCodeButtonDisabled = props.state.results.some((x) => x == "*");
+  const runCode = () => {
+    const fullParsedCode = props.state.results
+      .map((parsedCode) => {
+        if (parsedCode?.state == "SUCCESS") {
+          return parsedCode.data;
+        }
+        return "";
+      })
+      .join("\n");
+
+    axios.post("/api/execute", { code: fullParsedCode }).then((response) => {
+      setOutput(response.data);
+    });
+  };
 
   return (
     <div
@@ -72,6 +82,20 @@ function Canvas(props: {
   );
 }
 
+function ParsedCodeText(result: RemoteData<string> | undefined): string {
+  switch (result?.state) {
+    case "NOT_ASKED":
+      return "";
+    case "LOADING":
+      return "*";
+    case "FAILURE":
+      return result.error;
+    case "SUCCESS":
+      return result.data;
+  }
+  return "";
+}
+
 function Results(props: {
   state: State;
   parentHeight: string;
@@ -90,18 +114,20 @@ function Results(props: {
         paddingLeft: 30,
       }}
     >
-      {props.state.results.map((result: string, index) => (
-        <div
-          key={index}
-          className="results-item"
-          style={{
-            height: props.fontSize * props.lineHeight,
-            lineHeight: `${props.fontSize}px`,
-          }}
-        >
-          {result}
-        </div>
-      ))}
+      {props.state.results.map(
+        (result: RemoteData<string> | undefined, index) => (
+          <div
+            key={index}
+            className="results-item"
+            style={{
+              height: props.fontSize * props.lineHeight,
+              lineHeight: `${props.fontSize}px`,
+            }}
+          >
+            {ParsedCodeText(result)}
+          </div>
+        )
+      )}
     </div>
   );
 }
@@ -124,7 +150,7 @@ function runDebouncedParse(text: string, dispatch: Dispatch<Action>) {
       dispatch({
         type: "UPDATE_RESULTS",
         index: parseInt(lineNumber),
-        result: "*",
+        result: Loading(),
       });
 
       axios
@@ -135,14 +161,14 @@ function runDebouncedParse(text: string, dispatch: Dispatch<Action>) {
           dispatch({
             type: "UPDATE_RESULTS",
             index: parseInt(lineNumber),
-            result: response.data,
+            result: Success(response.data),
           });
         })
         .catch((_error) => {
           dispatch({
             type: "UPDATE_RESULTS",
             index: parseInt(lineNumber),
-            result: "parsing error",
+            result: Failure("parsing error"),
           });
         });
     }, 500);
