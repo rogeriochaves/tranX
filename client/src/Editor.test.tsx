@@ -33,7 +33,8 @@ describe("<Editor>", () => {
   });
 
   afterEach(() => {
-    axiosGET.reset();
+    axiosGET.resetHistory();
+    axiosPOST.resetHistory();
     clock.restore();
   });
 
@@ -173,5 +174,23 @@ describe("<Editor>", () => {
     expect(axiosPOST).calledWith("/api/execute", {
       code: "foo = 1 + 1\nprint(foo)",
     });
+  });
+
+  it("disables the run button while there is some line parsing", async () => {
+    axiosGET.onFirstCall().callsFake(async () => {
+      return { data: "first result" };
+    });
+    axiosGET.onSecondCall().callsFake(async () => {
+      await sleep(1000);
+      return { data: "parsing result" };
+    });
+
+    userEvent.type(canvas, "set foo to one plus one{enter}print foo");
+
+    clock.tick(500); // input debounce time
+
+    const runButton = await wrapper.findByTestId("run-code");
+    userEvent.click(runButton);
+    expect(axiosPOST).not.called;
   });
 });

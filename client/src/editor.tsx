@@ -23,6 +23,8 @@ function Canvas(props: {
       });
   };
 
+  const runCodeButtonDisabled = props.state.results.some((x) => x == "*");
+
   return (
     <div
       className="canvas"
@@ -57,7 +59,11 @@ function Canvas(props: {
           top: 50 + props.state.text.split("\n").length * 60 + "px",
         }}
       >
-        <button data-testid="run-code" onClick={runCode}>
+        <button
+          data-testid="run-code"
+          onClick={runCode}
+          disabled={runCodeButtonDisabled}
+        >
           Run Code
         </button>
         <div data-testid="output">{output}</div>
