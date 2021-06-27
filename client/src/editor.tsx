@@ -16,14 +16,14 @@ function Canvas(props: {
 }) {
   const [output, setOutput] = useState("");
 
-  const runCodeButtonDisabled = props.state.results.some(
-    (x) => x?.state != "SUCCESS"
+  const runCodeButtonDisabled = Object.values(props.state.results).some(
+    (x) => x.state != "SUCCESS"
   );
 
   const runCode = () => {
-    const fullParsedCode = props.state.results
+    const fullParsedCode = Object.values(props.state.results)
       .map((parsedCode) => {
-        if (parsedCode?.state == "SUCCESS") {
+        if (parsedCode.state == "SUCCESS") {
           return parsedCode.data;
         }
         return "";
@@ -82,8 +82,8 @@ function Canvas(props: {
   );
 }
 
-function ParsedCodeText(result: RemoteData<string> | undefined): string {
-  switch (result?.state) {
+function ParsedCodeText(result: RemoteData<string>): string {
+  switch (result.state) {
     case "NOT_ASKED":
       return "";
     case "LOADING":
@@ -93,7 +93,6 @@ function ParsedCodeText(result: RemoteData<string> | undefined): string {
     case "SUCCESS":
       return result.data;
   }
-  return "";
 }
 
 function Results(props: {
@@ -114,8 +113,8 @@ function Results(props: {
         paddingLeft: 30,
       }}
     >
-      {props.state.results.map(
-        (result: RemoteData<string> | undefined, index) => (
+      {Object.values(props.state.results).map(
+        (result: RemoteData<string>, index) => (
           <div
             key={index}
             className="results-item"

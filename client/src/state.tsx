@@ -2,12 +2,12 @@ import type { RemoteData } from "./utils/remoteData";
 
 export interface State {
   text: string;
-  results: Array<RemoteData<string> | undefined>;
+  results: Record<number, RemoteData<string>>;
 }
 
 export const initialState: State = {
   text: "",
-  results: [],
+  results: {},
 };
 
 export type Action =
@@ -19,8 +19,7 @@ export function reducer(state: State, action: Action): State {
     case "SET_TEXT":
       return { ...state, text: action.value };
     case "UPDATE_RESULTS":
-      const results = [...state.results];
-      results[action.index] = action.result;
+      const results = { ...state.results, [action.index]: action.result };
       return { ...state, results };
   }
 }
