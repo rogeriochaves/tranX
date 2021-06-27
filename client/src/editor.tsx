@@ -115,15 +115,30 @@ function runDebouncedParse(text: string, dispatch: Dispatch<Action>) {
 
     clearTimeout(parseCalls[lineNumber]?.timeout);
     const timeout = setTimeout(() => {
-      axios.get("/api/parse", { params: { code: line } }).then((response) => {
-        if (line != parseCalls[lineNumber]?.line) return;
-
-        dispatch({
-          type: "UPDATE_RESULTS",
-          index: parseInt(lineNumber),
-          result: response.data,
-        });
+      dispatch({
+        type: "UPDATE_RESULTS",
+        index: parseInt(lineNumber),
+        result: "*",
       });
+
+      axios
+        .get("/api/parse", { params: { code: line } })
+        .then((response) => {
+          if (line != parseCalls[lineNumber]?.line) return;
+
+          dispatch({
+            type: "UPDATE_RESULTS",
+            index: parseInt(lineNumber),
+            result: response.data,
+          });
+        })
+        .catch((_error) => {
+          dispatch({
+            type: "UPDATE_RESULTS",
+            index: parseInt(lineNumber),
+            result: "parsing error",
+          });
+        });
     }, 500);
 
     parseCalls[lineNumber] = { line, timeout };

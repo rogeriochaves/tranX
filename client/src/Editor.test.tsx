@@ -71,6 +71,37 @@ describe("<Editor>", () => {
     expect(axiosGET).callCount(2);
   });
 
+  it("displays loading feedback waiting for backend result", async () => {
+    axiosGET.callsFake(async () => {
+      await sleep(1000);
+      return { data: "1 + 1" };
+    });
+
+    userEvent.type(canvas, "one plus one{enter}");
+
+    clock.tick(500); // input debounce time
+
+    let results = await wrapper.findByTestId("results");
+    expect(results.textContent).contains("*");
+
+    clock.tick(1000);
+
+    results = await wrapper.findByTestId("results");
+    expect(results.textContent).not.contains("*");
+    expect(results.textContent).contains("1 + 1");
+  });
+
+  it("displays error when there is one", async () => {
+    axiosGET.returns(Promise.reject({ response: { data: "weird input man" } }));
+
+    userEvent.type(canvas, "hasiuehsuiahuisahe{enter}");
+
+    clock.tick(500); // input debounce time
+
+    let results = await wrapper.findByTestId("results");
+    expect(results.textContent).contains("parsing error");
+  });
+
   it("does not make a call to parse empty lines", async () => {
     axiosGET.returns(Promise.resolve({ data: "1 +" }));
     userEvent.type(canvas, "one plus one{enter} {enter}two plus two");
@@ -124,7 +155,7 @@ describe("<Editor>", () => {
     expect(results.textContent).contains("2 + 2");
   });
 
-  it("executed the code when clicking the run button", async () => {
+  it("executes the code when clicking the run button", async () => {
     axiosGET.onFirstCall().returns(Promise.resolve({ data: "foo = 1 + 1" }));
     axiosGET.onSecondCall().returns(Promise.resolve({ data: "print(foo)" }));
 
