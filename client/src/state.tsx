@@ -3,11 +3,13 @@ import type { RemoteData } from "./utils/remoteData";
 export interface State {
   input: string;
   parsedLines: Record<number, RemoteData<string>>;
+  output: string;
 }
 
 export const initialState: State = {
   input: "",
   parsedLines: {},
+  output: "",
 };
 
 export type Action =
@@ -16,7 +18,8 @@ export type Action =
       type: "UPDATE_PARSED_LINE";
       index: number;
       parsedLine: RemoteData<string>;
-    };
+    }
+  | { type: "SET_OUTPUT"; value: string };
 
 export function reducer(state: State, action: Action): State {
   switch (action.type) {
@@ -28,5 +31,7 @@ export function reducer(state: State, action: Action): State {
         [action.index]: action.parsedLine,
       };
       return { ...state, parsedLines };
+    case "SET_OUTPUT":
+      return { ...state, output: action.value };
   }
 }

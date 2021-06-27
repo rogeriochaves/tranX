@@ -7,6 +7,7 @@ import { Failure, Loading, RemoteData, Success } from "./utils/remoteData";
 
 function Canvas(props: {
   state: State;
+  dispatch: Dispatch<Action>;
   parentHeight: string;
   textAreaRef: React.Ref<HTMLTextAreaElement>;
   textAreaHeight: string;
@@ -14,8 +15,6 @@ function Canvas(props: {
   lineHeight: number;
   onChangeHandler: React.ChangeEventHandler<HTMLTextAreaElement>;
 }) {
-  const [output, setOutput] = useState("");
-
   const runCodeButtonDisabled = Object.values(props.state.parsedLines).some(
     (x) => x.state != "SUCCESS"
   );
@@ -31,7 +30,7 @@ function Canvas(props: {
       .join("\n");
 
     axios.post("/api/execute", { parsedCode }).then((response) => {
-      setOutput(response.data);
+      props.dispatch({ type: "SET_OUTPUT", value: response.data });
     });
   };
 
@@ -76,7 +75,7 @@ function Canvas(props: {
         >
           Run Code
         </button>
-        <div data-testid="output">{output}</div>
+        <div data-testid="output">{props.state.output}</div>
       </div>
     </div>
   );
@@ -234,6 +233,7 @@ export default function Editor(props: {
       <Row style={{ maxWidth: 1200, margin: "0 auto" }}>
         <Canvas
           state={props.state}
+          dispatch={props.dispatch}
           textAreaRef={textAreaRef}
           textAreaHeight={textAreaHeight}
           parentHeight={parentHeight}
