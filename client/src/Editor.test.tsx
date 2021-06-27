@@ -52,12 +52,12 @@ describe("<Editor>", () => {
 
     clock.tick(500); // input debounce time
 
-    const results = await wrapper.findByTestId("results");
+    const parsedCode = await wrapper.findByTestId("parsed-code");
 
     expect(axiosGET).calledWith("/api/parse", {
-      params: { code: "one plus one" },
+      params: { inputLine: "one plus one" },
     });
-    expect(results.textContent).contains("1 + 1");
+    expect(parsedCode.textContent).contains("1 + 1");
   });
 
   it("has a debounce when typing", async () => {
@@ -82,14 +82,14 @@ describe("<Editor>", () => {
 
     clock.tick(500); // input debounce time
 
-    let results = await wrapper.findByTestId("results");
-    expect(results.textContent).contains("*");
+    let parsedCode = await wrapper.findByTestId("parsed-code");
+    expect(parsedCode.textContent).contains("*");
 
     clock.tick(1000);
 
-    results = await wrapper.findByTestId("results");
-    expect(results.textContent).not.contains("*");
-    expect(results.textContent).contains("1 + 1");
+    parsedCode = await wrapper.findByTestId("parsed-code");
+    expect(parsedCode.textContent).not.contains("*");
+    expect(parsedCode.textContent).contains("1 + 1");
   });
 
   it("displays error when there is one", async () => {
@@ -99,8 +99,8 @@ describe("<Editor>", () => {
 
     clock.tick(500); // input debounce time
 
-    let results = await wrapper.findByTestId("results");
-    expect(results.textContent).contains("parsing error");
+    let parsedCode = await wrapper.findByTestId("parsed-code");
+    expect(parsedCode.textContent).contains("parsing error");
   });
 
   it("does not make a call to parse empty lines", async () => {
@@ -111,10 +111,10 @@ describe("<Editor>", () => {
 
     expect(axiosGET).callCount(2);
     expect(axiosGET).calledWith("/api/parse", {
-      params: { code: "one plus one" },
+      params: { inputLine: "one plus one" },
     });
     expect(axiosGET).calledWith("/api/parse", {
-      params: { code: "two plus two" },
+      params: { inputLine: "two plus two" },
     });
   });
 
@@ -133,17 +133,17 @@ describe("<Editor>", () => {
     userEvent.type(canvas, " one");
     clock.tick(600);
 
-    let results = await wrapper.findByTestId("results");
-    expect(results.textContent).contains("second result");
+    let parsedCode = await wrapper.findByTestId("parsed-code");
+    expect(parsedCode.textContent).contains("second result");
 
     clock.tick(200); // first result loads after the second
 
-    results = await wrapper.findByTestId("results");
-    expect(results.textContent).contains("second result");
-    expect(results.textContent).not.contains("first result");
+    parsedCode = await wrapper.findByTestId("parsed-code");
+    expect(parsedCode.textContent).contains("second result");
+    expect(parsedCode.textContent).not.contains("first result");
   });
 
-  it("shows the results for each line typed", async () => {
+  it("shows the parsedCode for each line typed", async () => {
     axiosGET.onFirstCall().returns(Promise.resolve({ data: "1 + 1" }));
     axiosGET.onSecondCall().returns(Promise.resolve({ data: "2 + 2" }));
 
@@ -151,9 +151,9 @@ describe("<Editor>", () => {
 
     clock.tick(500); // input debounce time
 
-    const results = await wrapper.findByTestId("results");
-    expect(results.textContent).contains("1 + 1");
-    expect(results.textContent).contains("2 + 2");
+    const parsedCode = await wrapper.findByTestId("parsed-code");
+    expect(parsedCode.textContent).contains("1 + 1");
+    expect(parsedCode.textContent).contains("2 + 2");
   });
 
   it("executes the code when clicking the run button", async () => {
@@ -172,7 +172,7 @@ describe("<Editor>", () => {
     const output = await wrapper.findByTestId("output");
     expect(output.textContent).contains("2");
     expect(axiosPOST).calledWith("/api/execute", {
-      code: "foo = 1 + 1\nprint(foo)",
+      parsedCode: "foo = 1 + 1\nprint(foo)",
     });
   });
 

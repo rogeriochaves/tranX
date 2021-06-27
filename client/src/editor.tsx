@@ -16,21 +16,21 @@ function Canvas(props: {
 }) {
   const [output, setOutput] = useState("");
 
-  const runCodeButtonDisabled = Object.values(props.state.results).some(
+  const runCodeButtonDisabled = Object.values(props.state.parsedLines).some(
     (x) => x.state != "SUCCESS"
   );
 
   const runCode = () => {
-    const fullParsedCode = Object.values(props.state.results)
-      .map((parsedCode) => {
-        if (parsedCode.state == "SUCCESS") {
-          return parsedCode.data;
+    const parsedCode = Object.values(props.state.parsedLines)
+      .map((parsedLine) => {
+        if (parsedLine.state == "SUCCESS") {
+          return parsedLine.data;
         }
         return "";
       })
       .join("\n");
 
-    axios.post("/api/execute", { code: fullParsedCode }).then((response) => {
+    axios.post("/api/execute", { parsedCode }).then((response) => {
       setOutput(response.data);
     });
   };
@@ -60,13 +60,13 @@ function Canvas(props: {
         }}
         onChange={props.onChangeHandler}
         placeholder="type some code..."
-        value={props.state.text}
+        value={props.state.input}
       />
       <div
         style={{
           position: "absolute",
           left: "30px",
-          top: 50 + props.state.text.split("\n").length * 60 + "px",
+          top: 50 + props.state.input.split("\n").length * 60 + "px",
         }}
       >
         <button
@@ -82,20 +82,20 @@ function Canvas(props: {
   );
 }
 
-function ParsedCodeText(result: RemoteData<string>): string {
-  switch (result.state) {
+function parsedLineAsText(parsedLine: RemoteData<string>): string {
+  switch (parsedLine.state) {
     case "NOT_ASKED":
       return "";
     case "LOADING":
       return "*";
     case "FAILURE":
-      return result.error;
+      return parsedLine.error;
     case "SUCCESS":
-      return result.data;
+      return parsedLine.data;
   }
 }
 
-function Results(props: {
+function ParsedCode(props: {
   state: State;
   parentHeight: string;
   fontSize: number;
@@ -103,8 +103,8 @@ function Results(props: {
 }) {
   return (
     <div
-      className="results"
-      data-testid="results"
+      className="parsed-code"
+      data-testid="parsed-code"
       style={{
         width: "100%",
         maxWidth: 400,
@@ -113,17 +113,17 @@ function Results(props: {
         paddingLeft: 30,
       }}
     >
-      {Object.values(props.state.results).map(
-        (result: RemoteData<string>, index) => (
+      {Object.values(props.state.parsedLines).map(
+        (parsedLine: RemoteData<string>, index) => (
           <div
             key={index}
-            className="results-item"
+            className="parsed-line"
             style={{
               height: props.fontSize * props.lineHeight,
               lineHeight: `${props.fontSize}px`,
             }}
           >
-            {ParsedCodeText(result)}
+            {parsedLineAsText(parsedLine)}
           </div>
         )
       )}
@@ -137,42 +137,51 @@ interface ParseCall {
 }
 
 let parseCalls: Array<ParseCall> = [];
-function runDebouncedParse(text: string, dispatch: Dispatch<Action>) {
-  const lines = text.split("\n");
-  for (const lineNumber in lines) {
-    const line = lines[lineNumber];
-    if (line.trim().length == 0) continue; // TODO: set line to empty
-    if (parseCalls[lineNumber]?.line == line) continue;
+function callParse(
+  inputLine: string,
+  lineNumber: number,
+  dispatch: Dispatch<Action>
+) {
+  dispatch({
+    type: "UPDATE_PARSED_LINE",
+    index: lineNumber,
+    parsedLine: Loading(),
+  });
+
+  axios
+    .get("/api/parse", { params: { inputLine: inputLine } })
+    .then((response) => {
+      if (inputLine != parseCalls[lineNumber]?.line) return;
+
+      dispatch({
+        type: "UPDATE_PARSED_LINE",
+        index: lineNumber,
+        parsedLine: Success(response.data),
+      });
+    })
+    .catch((_error) => {
+      dispatch({
+        type: "UPDATE_PARSED_LINE",
+        index: lineNumber,
+        parsedLine: Failure("parsing error"),
+      });
+    });
+}
+
+function runDebouncedParse(input: string, dispatch: Dispatch<Action>) {
+  const inputLines = input.split("\n");
+  for (let lineNumber in inputLines) {
+    const inputLine = inputLines[lineNumber];
+    if (inputLine.trim().length == 0) continue; // TODO: set line to empty
+    if (parseCalls[lineNumber]?.line == inputLine) continue;
 
     clearTimeout(parseCalls[lineNumber]?.timeout);
-    const timeout = setTimeout(() => {
-      dispatch({
-        type: "UPDATE_RESULTS",
-        index: parseInt(lineNumber),
-        result: Loading(),
-      });
+    const timeout = setTimeout(
+      () => callParse(inputLine, parseInt(lineNumber), dispatch),
+      500
+    );
 
-      axios
-        .get("/api/parse", { params: { code: line } })
-        .then((response) => {
-          if (line != parseCalls[lineNumber]?.line) return;
-
-          dispatch({
-            type: "UPDATE_RESULTS",
-            index: parseInt(lineNumber),
-            result: Success(response.data),
-          });
-        })
-        .catch((_error) => {
-          dispatch({
-            type: "UPDATE_RESULTS",
-            index: parseInt(lineNumber),
-            result: Failure("parsing error"),
-          });
-        });
-    }, 500);
-
-    parseCalls[lineNumber] = { line, timeout };
+    parseCalls[lineNumber] = { line: inputLine, timeout };
   }
 }
 
@@ -200,7 +209,7 @@ export default function Editor(props: {
     setTextAreaHeight(`${getTextAreaHeight()}px`);
   };
 
-  useEffect(setCanvasHeight, [props.state.text]);
+  useEffect(setCanvasHeight, [props.state.input]);
 
   useEffect(() => {
     setTextAreaHeight("auto");
@@ -208,12 +217,12 @@ export default function Editor(props: {
   }, [windowDimensions]);
 
   const onChangeHandler = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const text = event.target.value;
+    const input = event.target.value;
 
     setTextAreaHeight("auto");
-    props.dispatch({ type: "SET_TEXT", value: text });
+    props.dispatch({ type: "SET_INPUT", value: input });
 
-    runDebouncedParse(text, props.dispatch);
+    runDebouncedParse(input, props.dispatch);
   };
 
   return (
@@ -232,7 +241,7 @@ export default function Editor(props: {
           fontSize={fontSize}
           lineHeight={lineHeight}
         />
-        <Results
+        <ParsedCode
           state={props.state}
           parentHeight={parentHeight}
           fontSize={fontSize}

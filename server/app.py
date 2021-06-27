@@ -81,17 +81,17 @@ def upload():
 
 @app.route("/api/parse", methods=['GET'])
 def parse():
-    input = request.args['code']
-    hypotheses = parsers["natural"].parse(input)
-    output = hypotheses[0].code
-    return output
+    inputLine = request.args['inputLine']
+    hypotheses = parsers["natural"].parse(inputLine)
+    parsedLine = hypotheses[0].code
+    return parsedLine
 
 
 @app.route("/api/execute", methods=['POST'])
 def execute():
     output = {}
-    code = request.get_json()['code'] + "\noutput['printed'] = printed"
-    byte_code = compile_restricted(code, '<string>', mode='exec')
+    parsed_code = request.get_json()['parsedCode'] + "\noutput__['printed'] = printed"
+    byte_code = compile_restricted(parsed_code, '<string>', mode='exec')
 
     builtins = dict(safe_builtins)
     builtins["_print_"] = PrintCollector
@@ -99,7 +99,7 @@ def execute():
     builtins["_inplacevar_"] = lambda op, val, expr: eval(str(val) + op.replace("=", "") + str(expr))
     builtins["_getiter_"] = RestrictedPython.Eval.default_guarded_getiter
 
-    exec(byte_code, {'__builtins__': builtins}, {"output": output})
+    exec(byte_code, {'__builtins__': builtins}, {"output__": output})
 
     return output['printed']
 

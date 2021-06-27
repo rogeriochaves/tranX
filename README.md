@@ -211,3 +211,13 @@ To run tests:
 ```bash
 python3 -m unittest tests/test_model_sanity.py
 ```
+
+# Domain Language
+
+To avoid having too much generic names variables like "data", "result" or "params", let's establish an ubiquotous language:
+
+Each line the user types in natural text is called an **inputLine**, a collection of them is called **inputLines** and the concatenation of all lines into a single string is simply called **input**
+
+Each inputLine is parsed, which we call a **parsedLine**, a collection of them is called **parsedLines** and the concatenation of all lines into a single string is called **parsedCode**
+
+After executing the parsedCode, we get a single string called **output** as a result

@@ -1,25 +1,32 @@
 import type { RemoteData } from "./utils/remoteData";
 
 export interface State {
-  text: string;
-  results: Record<number, RemoteData<string>>;
+  input: string;
+  parsedLines: Record<number, RemoteData<string>>;
 }
 
 export const initialState: State = {
-  text: "",
-  results: {},
+  input: "",
+  parsedLines: {},
 };
 
 export type Action =
-  | { type: "SET_TEXT"; value: string }
-  | { type: "UPDATE_RESULTS"; index: number; result: RemoteData<string> };
+  | { type: "SET_INPUT"; value: string }
+  | {
+      type: "UPDATE_PARSED_LINE";
+      index: number;
+      parsedLine: RemoteData<string>;
+    };
 
 export function reducer(state: State, action: Action): State {
   switch (action.type) {
-    case "SET_TEXT":
-      return { ...state, text: action.value };
-    case "UPDATE_RESULTS":
-      const results = { ...state.results, [action.index]: action.result };
-      return { ...state, results };
+    case "SET_INPUT":
+      return { ...state, input: action.value };
+    case "UPDATE_PARSED_LINE":
+      const parsedLines = {
+        ...state.parsedLines,
+        [action.index]: action.parsedLine,
+      };
+      return { ...state, parsedLines };
   }
 }
