@@ -37,3 +37,14 @@ body {
   overflow-x: hidden;
   white-space: nowrap;
 }
+
+.output {
+  color: #444;
+  font-size: 28px;
+  line-height: 1.5em;
+}
+
+.output-title {
+  font-size: 14px;
+  background: #fff;
+}
