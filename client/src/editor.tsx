@@ -9,14 +9,82 @@ export default function Editor(props: {
   state: State;
   dispatch: Dispatch<Action>;
 }) {
+  const topbarHeight = 10;
+  const fontSize = 30;
+  const lineHeight = 2;
+
+  const runCodeButtonDisabled = Object.values(props.state.parsedLines).some(
+    (x) => x.state != "SUCCESS"
+  );
+
+  const runCode = () => {
+    const parsedCode = Object.values(props.state.parsedLines)
+      .map((parsedLine) => {
+        if (parsedLine.state == "SUCCESS") {
+          return parsedLine.data;
+        }
+        return "";
+      })
+      .join("\n");
+
+    axios.post("/api/execute", { parsedCode }).then((response) => {
+      props.dispatch({ type: "SET_OUTPUT", value: response.data });
+    });
+  };
+
+  return (
+    <>
+      <div
+        className="topbar"
+        style={{ width: "100%", height: topbarHeight }}
+      ></div>
+      <Row style={{ maxWidth: 1200, margin: "0 auto" }}>
+        <div
+          className="canvas"
+          style={{
+            minHeight: `calc(100vh - ${topbarHeight}px)`,
+            width: "100%",
+            minWidth: 300,
+            maxWidth: 800,
+          }}
+        >
+          <Canvas
+            state={props.state}
+            dispatch={props.dispatch}
+            fontSize={fontSize}
+            lineHeight={lineHeight}
+          />
+          <div style={{ padding: "0 30px" }}>
+            <button
+              data-testid="run-code"
+              onClick={runCode}
+              disabled={runCodeButtonDisabled}
+            >
+              Run Code
+            </button>
+            <Output state={props.state} />
+          </div>
+        </div>
+        <ParsedCode
+          state={props.state}
+          fontSize={fontSize}
+          lineHeight={lineHeight}
+        />
+      </Row>
+    </>
+  );
+}
+
+function Canvas(props: {
+  state: State;
+  dispatch: Dispatch<Action>;
+  fontSize: number;
+  lineHeight: number;
+}) {
   const windowDimensions = useWindowDimensions();
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const [textAreaHeight, setTextAreaHeight] = useState("auto");
   const [parentHeight, setParentHeight] = useState("auto");
-
-  const topbarHeight = 10;
-  const fontSize = 30;
-  const lineHeight = 2;
 
   const getTextAreaHeight = () => textAreaRef.current!.scrollHeight;
 
@@ -42,114 +110,34 @@ export default function Editor(props: {
   };
 
   return (
-    <>
-      <div
-        className="topbar"
-        style={{ width: "100%", height: topbarHeight }}
-      ></div>
-      <Row style={{ maxWidth: 1200, margin: "0 auto" }}>
-        <Canvas
-          state={props.state}
-          dispatch={props.dispatch}
-          textAreaRef={textAreaRef}
-          textAreaHeight={textAreaHeight}
-          parentHeight={parentHeight}
-          onChangeHandler={onChangeHandler}
-          fontSize={fontSize}
-          lineHeight={lineHeight}
-          topbarHeight={topbarHeight}
-        />
-        <ParsedCode
-          state={props.state}
-          parentHeight={parentHeight}
-          fontSize={fontSize}
-          lineHeight={lineHeight}
-        />
-      </Row>
-    </>
-  );
-}
-
-function Canvas(props: {
-  state: State;
-  dispatch: Dispatch<Action>;
-  parentHeight: string;
-  textAreaRef: React.Ref<HTMLTextAreaElement>;
-  textAreaHeight: string;
-  fontSize: number;
-  lineHeight: number;
-  topbarHeight: number;
-  onChangeHandler: React.ChangeEventHandler<HTMLTextAreaElement>;
-}) {
-  const runCodeButtonDisabled = Object.values(props.state.parsedLines).some(
-    (x) => x.state != "SUCCESS"
-  );
-
-  const runCode = () => {
-    const parsedCode = Object.values(props.state.parsedLines)
-      .map((parsedLine) => {
-        if (parsedLine.state == "SUCCESS") {
-          return parsedLine.data;
-        }
-        return "";
-      })
-      .join("\n");
-
-    axios.post("/api/execute", { parsedCode }).then((response) => {
-      props.dispatch({ type: "SET_OUTPUT", value: response.data });
-    });
-  };
-
-  return (
     <div
-      className="canvas"
       style={{
-        minHeight: `calc(100vh - ${props.topbarHeight}px)`,
-        width: "100%",
-        minWidth: 300,
-        maxWidth: 800,
+        minHeight: parentHeight,
+        position: "relative",
       }}
     >
-      <div
+      <textarea
+        className="canvas-textarea"
+        data-testid="canvas-textarea"
+        ref={textAreaRef}
+        rows={1}
         style={{
-          minHeight: props.parentHeight,
-          position: "relative",
+          width: "100%",
+          height: textAreaHeight,
+          padding: 30,
+          fontSize: props.fontSize,
+          lineHeight: props.lineHeight,
         }}
-      >
-        <textarea
-          className="canvas-textarea"
-          data-testid="canvas-textarea"
-          ref={props.textAreaRef}
-          rows={1}
-          style={{
-            width: "100%",
-            height: props.textAreaHeight,
-            padding: 30,
-            fontSize: props.fontSize,
-            lineHeight: props.lineHeight,
-          }}
-          onChange={props.onChangeHandler}
-          placeholder="type some code..."
-          value={props.state.input}
-        />
-      </div>
-      <div style={{ padding: "0 30px" }}>
-        <button
-          data-testid="run-code"
-          onClick={runCode}
-          disabled={runCodeButtonDisabled}
-        >
-          Run Code
-        </button>
-        <Output state={props.state} />
-      </div>
+        onChange={onChangeHandler}
+        placeholder="type some code..."
+        value={props.state.input}
+      />
     </div>
   );
 }
 
 function ParsedCode(props: {
   state: State;
-  parentHeight: string;
   fontSize: number;
   lineHeight: number;
 }) {
@@ -160,7 +148,6 @@ function ParsedCode(props: {
       style={{
         width: "100%",
         maxWidth: 400,
-        minHeight: props.parentHeight,
         paddingTop: 30 + props.fontSize / 2,
         paddingLeft: 30,
       }}
