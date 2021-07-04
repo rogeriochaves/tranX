@@ -1,14 +1,17 @@
-import type { RemoteData } from "./utils/remoteData";
+import { NotAsked, RemoteData } from "./utils/remoteData";
+
+export interface Line {
+  input: string;
+  parsed: RemoteData<string>;
+}
 
 export interface State {
-  input: string;
-  parsedLines: Record<number, RemoteData<string>>;
+  lines: Array<Line>;
   output: string;
 }
 
 export const initialState: State = {
-  input: "",
-  parsedLines: {},
+  lines: [],
   output: "",
 };
 
@@ -17,20 +20,28 @@ export type Action =
   | {
       type: "UPDATE_PARSED_LINE";
       index: number;
-      parsedLine: RemoteData<string>;
+      parsed: RemoteData<string>;
     }
   | { type: "SET_OUTPUT"; value: string };
 
 export function reducer(state: State, action: Action): State {
   switch (action.type) {
     case "SET_INPUT":
-      return { ...state, input: action.value };
-    case "UPDATE_PARSED_LINE":
-      const parsedLines = {
-        ...state.parsedLines,
-        [action.index]: action.parsedLine,
+      const inputLines = action.value.split("\n");
+      return {
+        ...state,
+        lines: inputLines.map((input, index) => ({
+          ...(state.lines[index] || { parsed: NotAsked() }),
+          input,
+        })),
       };
-      return { ...state, parsedLines };
+    case "UPDATE_PARSED_LINE":
+      return {
+        ...state,
+        lines: state.lines.map((line, index) =>
+          index == action.index ? { ...line, parsed: action.parsed } : line
+        ),
+      };
     case "SET_OUTPUT":
       return { ...state, output: action.value };
   }

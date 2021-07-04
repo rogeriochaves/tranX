@@ -1,9 +1,15 @@
-import React, { useState, useEffect, useRef, Dispatch, Props } from "react";
+import React, { useState, useEffect, useRef, Dispatch } from "react";
 import Row from "./components/Row";
 import useWindowDimensions from "./utils/useWindowDimensions";
 import axios from "axios";
-import type { State, Action } from "./state";
-import { Failure, Loading, RemoteData, Success } from "./utils/remoteData";
+import type { State, Action, Line } from "./state";
+import {
+  Failure,
+  Loading,
+  NotAsked,
+  RemoteData,
+  Success,
+} from "./utils/remoteData";
 
 export default function Editor(props: {
   state: State;
@@ -13,15 +19,15 @@ export default function Editor(props: {
   const fontSize = 30;
   const lineHeight = 2;
 
-  const runCodeButtonDisabled = Object.values(props.state.parsedLines).some(
-    (x) => x.state != "SUCCESS"
+  const runCodeButtonDisabled = Object.values(props.state.lines).some(
+    (x) => x.parsed.state != "SUCCESS"
   );
 
   const runCode = () => {
-    const parsedCode = Object.values(props.state.parsedLines)
-      .map((parsedLine) => {
-        if (parsedLine.state == "SUCCESS") {
-          return parsedLine.data;
+    const parsedCode = Object.values(props.state.lines)
+      .map((line) => {
+        if (line.parsed.state == "SUCCESS") {
+          return line.parsed.data;
         }
         return "";
       })
@@ -93,7 +99,8 @@ function Canvas(props: {
     setTextAreaHeight(`${getTextAreaHeight()}px`);
   };
 
-  useEffect(setCanvasHeight, [props.state.input]);
+  const input = props.state.lines.map((line) => line.input).join("\n");
+  useEffect(setCanvasHeight, [input]);
 
   useEffect(() => {
     setTextAreaHeight("auto");
@@ -130,7 +137,7 @@ function Canvas(props: {
         }}
         onChange={onChangeHandler}
         placeholder="type some code..."
-        value={props.state.input}
+        value={input}
       />
     </div>
   );
@@ -152,20 +159,18 @@ function ParsedCode(props: {
         paddingLeft: 30,
       }}
     >
-      {Object.values(props.state.parsedLines).map(
-        (parsedLine: RemoteData<string>, index) => (
-          <div
-            key={index}
-            className="parsed-line"
-            style={{
-              height: props.fontSize * props.lineHeight,
-              lineHeight: `${props.fontSize}px`,
-            }}
-          >
-            {parsedLineAsText(parsedLine)}
-          </div>
-        )
-      )}
+      {Object.values(props.state.lines).map((line: Line, index) => (
+        <div
+          key={index}
+          className="parsed-line"
+          style={{
+            height: props.fontSize * props.lineHeight,
+            lineHeight: `${props.fontSize}px`,
+          }}
+        >
+          {parsedLineAsText(line.parsed)}
+        </div>
+      ))}
     </div>
   );
 }
@@ -231,7 +236,7 @@ function callParse(
   dispatch({
     type: "UPDATE_PARSED_LINE",
     index: lineNumber,
-    parsedLine: Loading(),
+    parsed: Loading(),
   });
 
   axios
@@ -242,14 +247,14 @@ function callParse(
       dispatch({
         type: "UPDATE_PARSED_LINE",
         index: lineNumber,
-        parsedLine: Success(response.data),
+        parsed: Success(response.data),
       });
     })
     .catch((_error) => {
       dispatch({
         type: "UPDATE_PARSED_LINE",
         index: lineNumber,
-        parsedLine: Failure("parsing error"),
+        parsed: Failure("parsing error"),
       });
     });
 }
@@ -258,10 +263,20 @@ function runDebouncedParse(input: string, dispatch: Dispatch<Action>) {
   const inputLines = input.split("\n");
   for (let lineNumber in inputLines) {
     const inputLine = inputLines[lineNumber];
-    if (inputLine.trim().length == 0) continue; // TODO: set line to empty
     if (parseCalls[lineNumber]?.line == inputLine) continue;
 
     clearTimeout(parseCalls[lineNumber]?.timeout);
+
+    parseCalls[lineNumber] = { line: inputLine, timeout: 0 };
+    if (inputLine.trim().length == 0) {
+      dispatch({
+        type: "UPDATE_PARSED_LINE",
+        index: parseInt(lineNumber),
+        parsed: NotAsked(),
+      });
+      continue;
+    }
+
     const timeout = setTimeout(
       () => callParse(inputLine, parseInt(lineNumber), dispatch),
       500

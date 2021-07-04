@@ -118,6 +118,44 @@ describe("<Editor>", () => {
     });
   });
 
+  it("hides deleted lines", async () => {
+    axiosGET.onFirstCall().returns(Promise.resolve({ data: "1 + 1" }));
+    axiosGET.onSecondCall().returns(Promise.resolve({ data: "2 + 2" }));
+    userEvent.type(canvas, "one plus one{enter}two plus two");
+
+    clock.tick(500);
+
+    let parsedCode = await wrapper.findByTestId("parsed-code");
+    expect(parsedCode.textContent).contains("1 + 1");
+    expect(parsedCode.textContent).contains("2 + 2");
+
+    canvas.setSelectionRange(12, 25); // selects "\ntwo plus two"
+    userEvent.type(canvas, "{backspace}");
+
+    parsedCode = await wrapper.findByTestId("parsed-code");
+    expect(parsedCode.textContent).contains("1 + 1");
+    expect(parsedCode.textContent).not.contains("2 + 2");
+  });
+
+  it("clears emptied lines", async () => {
+    axiosGET.onFirstCall().returns(Promise.resolve({ data: "1 + 1" }));
+    axiosGET.onSecondCall().returns(Promise.resolve({ data: "2 + 2" }));
+    userEvent.type(canvas, "one plus one{enter}two plus two");
+
+    clock.tick(500);
+
+    let parsedCode = await wrapper.findByTestId("parsed-code");
+    expect(parsedCode.textContent).contains("1 + 1");
+    expect(parsedCode.textContent).contains("2 + 2");
+
+    canvas.setSelectionRange(13, 25); // selects "two plus two" after \n
+    userEvent.type(canvas, "{backspace}");
+
+    parsedCode = await wrapper.findByTestId("parsed-code");
+    expect(parsedCode.textContent).contains("1 + 1");
+    expect(parsedCode.textContent).not.contains("2 + 2");
+  });
+
   it("uses only the last requested parsing if there is a race condition", async () => {
     axiosGET.onFirstCall().callsFake(async () => {
       await sleep(800);
