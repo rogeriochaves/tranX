@@ -7,3 +7,4 @@ nltk
 xgboost
 python-rex
 RestrictedPython
+marko

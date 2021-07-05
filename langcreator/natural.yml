@@ -1,0 +1,60 @@
+assignment:
+  "$name = $value":
+    - "set $name to $value"
+    - "let $name to be $value"
+    - "$name = $value"
+if:
+  "if $condition:":
+    - "if $condition"
+  "if not $condition:":
+    - "if not $condition"
+    - "unless $condition"
+  "if $condition:\n  $expression":
+    - "$expression if $condition"
+  "$assignment if $condition else $value":
+    - "$assignment if $condition else $value"
+  "if $condition:\n  $expression\nelse:\n  $expression":
+    - "$expression if $condition else $expression"
+expression:
+  - assignment
+value_or_expression:
+  - value
+  - expression
+comparison:
+  "$value_or_expression == $value_or_expression":
+    - "$value_or_expression == $value_or_expression"
+    - "$value_or_expression is $value_or_expression"
+  "$value_or_expression > $value_or_expression":
+    - "$value_or_expression > $value_or_expression"
+    - "$value_or_expression gt $value_or_expression"
+    - "$value_or_expression is greater than $value_or_expression"
+composition:
+  "$comparison and $comparison"
+    - "$comparison and $comparison"
+    - "$comparison && $comparison"
+  "$comparison or $comparison":
+    - "$comparison or $comparison"
+    - "$comparison || $comparison"
+nested_composition:
+  - parens_composition
+  - composition
+  - comparison
+parens_composition:
+  "($composition)":
+    - "($composition)"
+condition:
+  - comparison
+  - composition
+params:
+  - name
+functions:
+  "def $name($params):":
+    - "def $name $params"
+    - "define function $name $params"
+    - "let function #NAME #PARAMS"
+    - "create function #NAME #PARAMS"
+    - "function #NAME #PARAMS"
+    - "fun #NAME #PARAMS"
+    - "fn #NAME #PARAMS"
+    - "subroutine #NAME #PARAMS"
+    - "sub #NAME #PARAMS"
