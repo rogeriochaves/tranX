@@ -43,16 +43,16 @@
 
     #expression if #condition else #expression
 
-# expression:
+# expression
 
 - assignment
 
-# value_or_expression:
+# value_or_expression
 
 - value
 - expression
 
-# condition:
+# condition
 
 - comparison
 - composition
