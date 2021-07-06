@@ -8,7 +8,7 @@ def generate_statement_sample(variable_to_use=None):
 
   # TODO: add more expressions? add if?
   if choice(["assignment", "update"]) == "assignment":
-    return assignment.generate_sample(variable_to_use)
+    return assignment.generate_expression_assignment_sample(variable_to_use)
   else:
     return operations.generate_sample_update(variable_to_use)
 
