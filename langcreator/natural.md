@@ -20,6 +20,51 @@
     subroutine #name #params
     sub #name #params
 
+# list_processing
+
+`[ x[#name] for x in #list ]`
+
+    select #name from #list
+    from #list map #name
+    #list.map(#name' => #name'[#name''])
+
+`[ x[#name] for x in previous ]`
+
+    map #name
+    |> map #name
+
+`[ x for x in previous if #comparison ]`
+
+    filter #comparison
+    |> filter #comparison
+    grep #comparison
+
+`[ x[#name] for x in #list if #comparison ]`
+
+    select #name from #list where #comparison
+
+
+# call_function
+
+`#name(#args)`
+
+    #name #args
+    call #name with #args
+
+`#name()`
+
+    #name()
+    call #name
+
+# lambdas
+
+`#name = lambda #params: #expression`
+
+    #name #params = #expression
+    #name = lambda #params: #expression
+    #name = #params => #expression
+    #name = \#params -> #expression
+
 # if
 
 `if #condition:`
@@ -45,7 +90,7 @@
 
 # expression
 
-- assignment
+- call_function
 
 # value_or_expression
 
@@ -59,46 +104,89 @@
 
 # comparison
 
-`$value_or_expression == $value_or_expression`
+`#value_or_expression == #value_or_expression`
 
-    $value_or_expression == $value_or_expression
-    $value_or_expression is $value_or_expression
+    #value_or_expression == #value_or_expression
+    #value_or_expression is #value_or_expression
 
-`$value_or_expression > $value_or_expression`
+`#value_or_expression > #value_or_expression`
 
-    $value_or_expression > $value_or_expression
-    $value_or_expression gt $value_or_expression
-    $value_or_expression is greater than $value_or_expression
+    #value_or_expression > #value_or_expression
+    #value_or_expression gt #value_or_expression
+    #value_or_expression is greater than #value_or_expression
 
 # composition
 
-`$nested_composition and $nested_composition`
+`#condition and #condition`
 
-    $nested_composition and $nested_composition
-    $nested_composition && $nested_composition
+    #condition and #condition
+    #condition && #condition
 
-`$nested_composition or $nested_composition`
+`#condition or #condition`
 
-    $nested_composition or $nested_composition
-    $nested_composition || $nested_composition
+    #condition or #condition
+    #condition || #condition
 
-# nested_composition
+# parens_composition
+
+`(#composition)`
+
+    (#composition)
+
+# condition
 
 - parens_composition
 - composition
 - comparison
 
-# parens_composition
-
-`($composition)`
-
-    ($composition)
-
-# condition
-
-- comparison
-- composition
-
 # params
 
-- name
+`<empty>`
+
+    <empty>
+    ()
+
+`#name`
+
+    #name
+    (#name)
+
+`#name, #name`
+
+    #name, #name
+    #name #name
+    (#name, #name)
+    (#name #name)
+
+`#name, #name, #name`
+
+    #name, #name, #name
+    #name #name
+    (#name, #name, #name)
+    (#name #name)
+
+# args
+
+`<empty>`
+
+    <empty>
+    ()
+
+`#value`
+
+    #value
+    (#value)
+
+`#value, #value`
+
+    #value, #value
+    #value #value
+    (#value, #value)
+    (#value #value)
+
+`#value, #value, #value`
+
+    #value, #value, #value
+    #value #value
+    (#value, #value, #value)
+    (#value #value)
