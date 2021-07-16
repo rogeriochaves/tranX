@@ -19,6 +19,10 @@ class GenerateTestCase(unittest.TestCase):
 
     define function #name #params
     fun #name #params
+
+# params
+
+- name
 """
         result = parse(example)
         self.assertEqual(
@@ -33,18 +37,21 @@ class GenerateTestCase(unittest.TestCase):
                     ["define function #name #params", "fun #name #params"],
                     "output":
                     "def #name(#params):"
-                }
+                },
+                "params": [
+                    "name"
+                ]
             })
 
     def test_parses_composition_tags(self):
         example = """
-# condition
+# value
 
-- comparison
-- composition
+- string
+- number
 """
         result = parse(example)
-        self.assertEqual(result, {"condition": ["comparison", "composition"]})
+        self.assertEqual(result, {"value": ["string", "number"]})
 
     def test_throws_if_example_does_not_have_all_tags(self):
         example = """
@@ -115,8 +122,20 @@ class GenerateTestCase(unittest.TestCase):
 """
         with self.assertRaisesRegex(
                 Exception,
-                "#banana is used in # assignment but it's not defined anywhere. Defined tags are #number, #name, #string"
+                "#banana is used in # assignment but it's not defined anywhere. Defined tags are #number, #string, #name, #assignment"
         ):
             parse(example)
 
-    # TODO: error when using unavailable #tag accross the board
+
+    def test_throws_for_missing_output(self):
+        example = """
+# foo
+
+- name
+- banana
+"""
+        with self.assertRaisesRegex(
+                Exception,
+                "- banana is used in # foo but it's not defined anywhere. Defined tags are #number, #string, #name, #foo"
+        ):
+            parse(example)

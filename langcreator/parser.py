@@ -27,8 +27,9 @@ def parse(content):
             generators[tag_name] = [
                 x.children[0].children[0].children for x in item.children
             ]
+    _check_previous_generator(generators, tag_name)
 
-    # _check_all_used_tags(generators)
+    _check_all_used_tags(generators)
     return generators
 
 
@@ -36,10 +37,7 @@ tag_regex = r"#[\w_]+"
 
 
 def _check_tags(generator):
-    necessary_tags = [
-        x for x in re.findall(tag_regex, generator["output"])
-        if x.startswith("#")
-    ]
+    necessary_tags = _get_tags(generator["output"])
     for index, input in enumerate(generator["inputs"]):
         for tag in necessary_tags:
             if tag not in input:
@@ -56,7 +54,32 @@ def _check_tag_name(tag):
 def _check_previous_generator(generators, name):
     if name is None:
         return
+    if type(generators[name]) == list:
+        return
     if len(generators[name]["inputs"]) == 0:
         raise Exception("input examples missing on # %s" % name)
     if len(generators[name]["output"]) == 0:
         raise Exception("output missing on # %s" % name)
+
+
+def _get_tags(str):
+    return [x for x in re.findall(tag_regex, str) if x.startswith("#")]
+
+
+def _check_all_used_tags(generators):
+    available_tags = ["#number", "#string", "#name"
+                      ] + ["#" + x for x in generators.keys()]
+    for key, generator in generators.items():
+        if type(generator) == list:
+            for tag in generator:
+                if "#" + tag not in available_tags:
+                    raise Exception(
+                        "- %s is used in # %s but it's not defined anywhere. Defined tags are %s"
+                        % (tag, key, ", ".join(available_tags)))
+        else:
+            tags = _get_tags(generator["output"])
+            for tag in tags:
+                if tag not in available_tags:
+                    raise Exception(
+                        "%s is used in # %s but it's not defined anywhere. Defined tags are %s"
+                        % (tag, key, ", ".join(available_tags)))
