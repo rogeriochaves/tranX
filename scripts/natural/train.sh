@@ -24,7 +24,7 @@ mkdir -p logs/natural
 echo commit hash: `git rev-parse HEAD` > logs/natural/${model_name}.log
 
 # --cuda
-python exp.py \
+python3 exp.py \
     --seed ${seed} \
     --mode train \
     --batch_size 10 \

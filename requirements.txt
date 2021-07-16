@@ -8,3 +8,5 @@ xgboost
 python-rex
 RestrictedPython
 marko
+torch
+babel
