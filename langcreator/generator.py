@@ -1,9 +1,10 @@
+import os
 import string
 import nltk  # type: ignore
 import re
 from nltk import FreqDist
 from nltk.corpus import brown, stopwords  # type: ignore
-from typing import List, Optional
+from typing import List
 from langcreator.common import Generators, InputOutput, InputOutputGenerator, get_tags, T, choice
 
 nltk.download('brown', quiet=True)
@@ -79,3 +80,17 @@ def _generate_input_output_sample(
 
 def _generate_name():
     return "_".join(choice(names, choice([1, 2, 3])))
+
+
+def save_generated(generated: List[InputOutput], path: str = None):
+    if path is None:
+        path = os.path.dirname(__file__)
+
+    inputs = [i for i, _ in generated]
+    outputs = [o for _, o in generated]
+
+    with open(os.path.join(path, 'inputs.txt'), 'w') as f:
+        f.write("\n".join(inputs))
+
+    with open(os.path.join(path, 'outputs.txt'), 'w') as f:
+        f.write("\n".join(outputs))

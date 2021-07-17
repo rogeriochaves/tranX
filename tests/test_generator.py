@@ -1,6 +1,7 @@
+from datasets.natural.datagen.base_generator import save_generated
 import unittest
 
-from langcreator.generator import generate_samples
+from langcreator.generator import generate_samples, save_generated
 import langcreator.common
 
 langcreator.common.set_seed(42)
@@ -21,3 +22,16 @@ class GeneratorTestCase(unittest.TestCase):
                          [('let social_side to be 0.08', 'social_side = 0.08'),
                           ('set v_help to 0.72', 'v_help = 0.72'),
                           ('84', '84')])
+
+    def test_save_generated(self):
+        generated = [("foo input", "foo"), ("bar input", "bar")]
+
+        save_generated(generated, path="/tmp/")
+
+        with open("/tmp/inputs.txt") as f:
+            content = f.read()
+        self.assertEqual(content, "foo input\nbar input")
+
+        with open("/tmp/outputs.txt") as f:
+            content = f.read()
+        self.assertEqual(content, "foo\nbar")
