@@ -10,3 +10,4 @@ RestrictedPython
 marko
 torch
 babel
+mypy

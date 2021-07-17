@@ -212,6 +212,12 @@ To run tests:
 python3 -m unittest tests/test_model_sanity.py
 ```
 
+To type check:
+
+```bash
+mypy --namespace-packages --explicit-package-bases langcreator/generator.py
+```
+
 # Domain Language
 
 To avoid having too much generic names variables like "data", "result" or "params", let's establish an ubiquotous language:

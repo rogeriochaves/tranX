@@ -1,7 +1,7 @@
-from typing import Collection
 from marko.parser import Parser
 from marko.block import Heading, Paragraph, CodeBlock, List
 from marko.inline import CodeSpan
+from langcreator.common import tag_regex, get_tags
 import collections
 import re
 
@@ -35,18 +35,15 @@ def parse(content):
     return generators
 
 
-tag_regex = r"#[\w_]+"
-
-
 def _check_tags(generators, name):
     generator = generators[name]
     output = generator["output"]
 
-    necessary_tags = _get_tags(output)
+    necessary_tags = get_tags(output)
     necessary_tags = dict(collections.Counter(necessary_tags))
 
     for index, input in enumerate(generator["inputs"]):
-        input_tags = _get_tags(input)
+        input_tags = get_tags(input)
         input_tags = dict(collections.Counter(input_tags))
 
         for tag, count in input_tags.items():
@@ -78,8 +75,6 @@ def _check_previous_generator(generators, name):
         raise Exception("output missing on # %s" % name)
 
 
-def _get_tags(str):
-    return [x for x in re.findall(tag_regex, str) if x.startswith("#")]
 
 
 def _check_all_used_tags(generators):
@@ -93,7 +88,7 @@ def _check_all_used_tags(generators):
                         "- %s is used in # %s but it's not defined anywhere. Defined tags are %s"
                         % (tag, key, ", ".join(available_tags)))
         else:
-            tags = _get_tags(generator["output"])
+            tags = get_tags(generator["output"])
             for tag in tags:
                 if tag not in available_tags:
                     raise Exception(

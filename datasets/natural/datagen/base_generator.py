@@ -10,15 +10,6 @@ from numpy.random import rand
 nltk.download('brown', quiet=True)
 nltk.download('stopwords', quiet=True)
 
-templates = [
-    "sum #A and #B",
-    "add #A plus #A",
-    "#A plus #B",
-    "#A + #B",
-]
-
-update_templates = ["#A += #B", "add #A to #B"]
-
 value_types = ['string', 'number', 'written_number', 'variable', 'list']
 numbers_written = [
     'zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight',

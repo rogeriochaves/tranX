@@ -3,7 +3,7 @@ import unittest
 from langcreator.parser import parse
 
 
-class GenerateTestCase(unittest.TestCase):
+class ParserTestCase(unittest.TestCase):
     def test_parses_examples(self):
         example = """
 # assignment
