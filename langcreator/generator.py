@@ -43,6 +43,7 @@ def generate_samples(generators: Generators, n: int) -> List[InputOutput]:
 
 
 def _generate_sample(generators: Generators, key: str) -> InputOutput:
+    key = key.replace("'", "")
     if key == "int":
         input = output = str(choice(numbers))
         return (input, output)

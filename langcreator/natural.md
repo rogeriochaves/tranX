@@ -26,7 +26,7 @@
 
     select #name from #list
     from #list map #name
-    #list.map(#name' => #name'[#name''])
+    #list.map(#name' => #name'[#name])
 
 `[ x[#name] for x in previous ]`
 

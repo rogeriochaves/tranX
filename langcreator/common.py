@@ -17,7 +17,7 @@ T = TypeVar('T')
 
 InputOutput = Tuple[str, str]
 
-tag_regex = r"#[\w_]+"
+tag_regex = r"#[\w_]+'*"
 
 rng = np.random.default_rng()
 

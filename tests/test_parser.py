@@ -28,8 +28,7 @@ class ParserTestCase(unittest.TestCase):
         self.assertEqual(
             result, {
                 "assignment": {
-                    "inputs":
-                    ["set #name to #int", "let #name to be #int"],
+                    "inputs": ["set #name to #int", "let #name to be #int"],
                     "output": "#name = #int"
                 },
                 "function": {
@@ -38,9 +37,7 @@ class ParserTestCase(unittest.TestCase):
                     "output":
                     "def #name(#params):"
                 },
-                "params": [
-                    "name"
-                ]
+                "params": ["name"]
             })
 
     def test_parses_composition_tags(self):
@@ -53,6 +50,29 @@ class ParserTestCase(unittest.TestCase):
         result = parse(example)
         self.assertEqual(result, {"value": ["string", "int"]})
 
+    def test_parses_prime_tags(self):
+        example = """
+# list_processing
+
+`[ x[#name] for x in [#int] ]`
+
+    select #name from [#int]
+    from [#int] map #name
+    [#int].map(#name' => #name'[#name])
+"""
+        result = parse(example)
+        self.assertEqual(
+            result, {
+                "list_processing": {
+                    "inputs": [
+                        "select #name from [#int]", "from [#int] map #name",
+                        "[#int].map(#name' => #name'[#name])"
+                    ],
+                    "output":
+                    "[ x[#name] for x in [#int] ]"
+                },
+            })
+
     def test_throws_if_example_does_not_have_all_tags(self):
         example = """
 # assignment
@@ -64,8 +84,7 @@ class ParserTestCase(unittest.TestCase):
 """
         with self.assertRaisesRegex(
                 Exception,
-                "missing #int in example 1 of assignment `#name = #int`"
-        ):
+                "missing #int in example 1 of assignment `#name = #int`"):
             parse(example)
 
     def test_throws_if_example_does_not_have_all_tags(self):
@@ -140,7 +159,6 @@ class ParserTestCase(unittest.TestCase):
                 "#banana is used in # assignment but it's not defined anywhere. Defined tags are #int, #float, #string, #name, #assignment"
         ):
             parse(example)
-
 
     def test_throws_for_missing_output(self):
         example = """

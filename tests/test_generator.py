@@ -35,3 +35,20 @@ class GeneratorTestCase(unittest.TestCase):
         with open("/tmp/outputs.txt") as f:
             content = f.read()
         self.assertEqual(content, "foo\nbar")
+
+    def test_matches_prime_orders(self):
+        generators = {
+            "list": {
+                "output":
+                "[ #int, #int', #int'' ]",
+                "inputs": [
+                    "second item #int', first and foremost #int and last but not least #int''"
+                ]
+            },
+        }
+        result = generate_samples(generators, n=1)
+
+        self.assertEqual(result, [
+            ("second item 45, first and foremost 50 and last but not least 37",
+             '[ 50, 45, 37 ]'),
+        ])

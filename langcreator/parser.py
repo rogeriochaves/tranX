@@ -47,6 +47,7 @@ def _check_tags(generators, name):
         input_tags = dict(collections.Counter(input_tags))
 
         for tag, count in input_tags.items():
+            tag = tag.replace("'", "")
             if tag not in necessary_tags:
                 raise Exception(f"missing {tag} in example {index + 1} of {name} `{output}`")
 
