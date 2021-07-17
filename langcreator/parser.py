@@ -1,6 +1,8 @@
+from typing import Collection
 from marko.parser import Parser
 from marko.block import Heading, Paragraph, CodeBlock, List
 from marko.inline import CodeSpan
+import collections
 import re
 
 
@@ -22,7 +24,7 @@ def parse(content):
         elif type(item) == CodeBlock:
             inputs = item.children[0].children.strip().split("\n")
             generators[tag_name]["inputs"] = inputs
-            _check_tags(generators[tag_name])
+            _check_tags(generators, tag_name)
         elif type(item) == List:
             generators[tag_name] = [
                 x.children[0].children[0].children for x in item.children
@@ -36,13 +38,27 @@ def parse(content):
 tag_regex = r"#[\w_]+"
 
 
-def _check_tags(generator):
-    necessary_tags = _get_tags(generator["output"])
+def _check_tags(generators, name):
+    generator = generators[name]
+    output = generator["output"]
+
+    necessary_tags = _get_tags(output)
+    necessary_tags = dict(collections.Counter(necessary_tags))
+
     for index, input in enumerate(generator["inputs"]):
-        for tag in necessary_tags:
-            if tag not in input:
-                raise Exception("missing %s in example %s of assignment `%s`" %
-                                (tag, index + 1, generator["output"]))
+        input_tags = _get_tags(input)
+        input_tags = dict(collections.Counter(input_tags))
+
+        for tag, count in input_tags.items():
+            if tag not in necessary_tags:
+                raise Exception(f"missing {tag} in example {index + 1} of {name} `{output}`")
+
+            diff = necessary_tags[tag] - count
+            if diff > 0:
+                raise Exception(
+                    f"missing {diff} {tag} in example {index + 1} of {name} `{output}`. " +
+                    f"Expected to find {necessary_tags[tag]} {tag}, found {count}."
+                )
 
 
 def _check_tag_name(tag):
@@ -67,7 +83,7 @@ def _get_tags(str):
 
 
 def _check_all_used_tags(generators):
-    available_tags = ["#number", "#string", "#name"
+    available_tags = ["#int", "#float", "#string", "#name"
                       ] + ["#" + x for x in generators.keys()]
     for key, generator in generators.items():
         if type(generator) == list:

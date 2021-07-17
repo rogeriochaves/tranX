@@ -8,10 +8,10 @@ class GenerateTestCase(unittest.TestCase):
         example = """
 # assignment
 
-`#name = #number`
+`#name = #int`
 
-    set #name to #number
-    let #name to be #number
+    set #name to #int
+    let #name to be #int
 
 # function
 
@@ -29,8 +29,8 @@ class GenerateTestCase(unittest.TestCase):
             result, {
                 "assignment": {
                     "inputs":
-                    ["set #name to #number", "let #name to be #number"],
-                    "output": "#name = #number"
+                    ["set #name to #int", "let #name to be #int"],
+                    "output": "#name = #int"
                 },
                 "function": {
                     "inputs":
@@ -48,23 +48,38 @@ class GenerateTestCase(unittest.TestCase):
 # value
 
 - string
-- number
+- int
 """
         result = parse(example)
-        self.assertEqual(result, {"value": ["string", "number"]})
+        self.assertEqual(result, {"value": ["string", "int"]})
 
     def test_throws_if_example_does_not_have_all_tags(self):
         example = """
 # assignment
 
-`#name = #number`
+`#name = #int`
 
     set #name
-    let #name to be #number
+    let #name to be #int
 """
         with self.assertRaisesRegex(
                 Exception,
-                "missing #number in example 1 of assignment `#name = #number`"
+                "missing #int in example 1 of assignment `#name = #int`"
+        ):
+            parse(example)
+
+    def test_throws_if_example_does_not_have_all_tags(self):
+        example = """
+# params
+
+`(#string, #string, #string)`
+
+    (#string, #string, #string)
+    (#string #string)
+"""
+        with self.assertRaisesRegex(
+                Exception,
+                "missing 1 #string in example 2 of params `\(#string, #string, #string\)`. Expected to find 3 #string, found 2."
         ):
             parse(example)
 
@@ -72,9 +87,9 @@ class GenerateTestCase(unittest.TestCase):
         example = """
 # assignment:
 
-`#name = #number`
+`#name = #int`
 
-    set #name to #number
+    set #name to #int
 """
         with self.assertRaisesRegex(
                 Exception,
@@ -89,9 +104,9 @@ class GenerateTestCase(unittest.TestCase):
 
 # assignment
 
-`#name = #number`
+`#name = #int`
 
-    set #name to #number
+    set #name to #int
 """
         with self.assertRaisesRegex(Exception,
                                     "input examples missing on # foo"):
@@ -105,9 +120,9 @@ class GenerateTestCase(unittest.TestCase):
 
 # assignment
 
-`#name = #number`
+`#name = #int`
 
-    set #name to #number
+    set #name to #int
 """
         with self.assertRaisesRegex(Exception, "output missing on # foo"):
             parse(example)
@@ -122,7 +137,7 @@ class GenerateTestCase(unittest.TestCase):
 """
         with self.assertRaisesRegex(
                 Exception,
-                "#banana is used in # assignment but it's not defined anywhere. Defined tags are #number, #string, #name, #assignment"
+                "#banana is used in # assignment but it's not defined anywhere. Defined tags are #int, #float, #string, #name, #assignment"
         ):
             parse(example)
 
@@ -136,6 +151,12 @@ class GenerateTestCase(unittest.TestCase):
 """
         with self.assertRaisesRegex(
                 Exception,
-                "- banana is used in # foo but it's not defined anywhere. Defined tags are #number, #string, #name, #foo"
+                "- banana is used in # foo but it's not defined anywhere. Defined tags are #int, #float, #string, #name, #foo"
         ):
             parse(example)
+
+    def test_parses_full_natural_definition_raising_no_exceptions(self):
+        with open("langcreator/natural.md") as f:
+            content = f.read()
+
+        parse(content)

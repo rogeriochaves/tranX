@@ -43,7 +43,6 @@
 
     select #name from #list where #comparison
 
-
 # call_function
 
 `#name(#args)`
@@ -161,9 +160,9 @@
 `#name, #name, #name`
 
     #name, #name, #name
-    #name #name
+    #name #name, #name
     (#name, #name, #name)
-    (#name #name)
+    (#name #name #name)
 
 # args
 
@@ -187,6 +186,43 @@
 `#value, #value, #value`
 
     #value, #value, #value
-    #value #value
+    #value #value #value
     (#value, #value, #value)
+    (#value #value #value)
+
+# list
+
+`[]`
+
+    []
+    ()
+
+`[#value]`
+
+    [#value]
+    (#value)
+
+`[#value, #value]`
+
+    [#value, #value]
+    (#value, #value)
     (#value #value)
+    list of #value and #value
+
+`[#value, #value, #value]`
+
+    [#value, #value, #value]
+    (#value, #value, #value)
+    (#value #value #value)
+    list of #value, #value and #value
+
+# value
+
+- string
+- name
+- number
+
+# number
+
+- int
+- float
