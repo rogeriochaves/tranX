@@ -1,7 +1,6 @@
 import string
 import nltk  # type: ignore
 import re
-import numpy as np
 from nltk import FreqDist
 from nltk.corpus import brown, stopwords  # type: ignore
 from typing import List, Optional
@@ -36,31 +35,35 @@ numbers = list(range(101))
 
 
 def generate_samples(generators: Generators, n: int) -> List[InputOutput]:
-    return [_generate_sample(generators, None) for _ in range(n)]
+    return [
+        _generate_sample(generators, choice(list(generators.keys())))
+        for _ in range(n)
+    ]
 
 
-def _generate_sample(generators: Generators,
-                     key: Optional[str]) -> InputOutput:
-    if key is None:
-        key = choice(list(generators.keys()))
-
+def _generate_sample(generators: Generators, key: str) -> InputOutput:
     if key == "int":
         input = output = str(choice(numbers))
         return (input, output)
     elif key == "name":
         input = output = _generate_name()
         return (input, output)
+    elif key == "float":
+        input = output = str(choice(numbers) / choice([10, 100]))
+        return (input, output)
 
     generator = generators[key]
     if type(generator) == dict:
-        return _generate_input_output_sample(generators, generator, key)
+        return _generate_input_output_sample(generators, generator)
+    elif type(generator) == list:
+        return _generate_sample(generators, choice(generator))
+    else:
+        raise Exception(f"Invalid generator {key}")
 
-    return ("undefined", "undefined")
 
-
-def _generate_input_output_sample(generators: Generators,
-                                  generator: InputOutputGenerator,
-                                  key: str) -> InputOutput:
+def _generate_input_output_sample(
+        generators: Generators,
+        generator: InputOutputGenerator) -> InputOutput:
     input_template = choice(generator["inputs"])
     output_template = generator["output"]
 
