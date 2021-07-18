@@ -96,11 +96,6 @@
 - value
 - expression
 
-# condition
-
-- comparison
-- composition
-
 # comparison
 
 `#value_or_expression == #value_or_expression`

@@ -178,3 +178,18 @@ class ParserTestCase(unittest.TestCase):
             content = f.read()
 
         parse(content)
+
+    def test_throws_when_defined_twice(self):
+        example = """
+# foo
+
+- name
+- string
+
+# foo
+
+- string
+- int
+"""
+        with self.assertRaisesRegex(Exception, "# foo is being defined twice"):
+            parse(example)

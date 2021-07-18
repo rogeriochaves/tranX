@@ -17,6 +17,7 @@ def parse(content):
             _check_previous_generator(generators, tag_name)
             tag_name = item.children[0].children
             _check_tag_name(tag_name)
+            _check_defined_twice(generators, tag_name)
             generators[tag_name] = {"inputs": [], "output": ""}
         elif type(item) == Paragraph and type(item.children[0]) == CodeSpan:
             output = item.children[0].children
@@ -49,12 +50,15 @@ def _check_tags(generators, name):
         for tag, count in input_tags.items():
             tag = tag.replace("'", "")
             if tag not in necessary_tags:
-                raise Exception(f"missing {tag} in example {index + 1} of {name} `{output}`")
+                raise Exception(
+                    f"missing {tag} in example {index + 1} of {name} `{output}`"
+                )
 
             diff = necessary_tags[tag] - count
             if diff > 0:
                 raise Exception(
-                    f"missing {diff} {tag} in example {index + 1} of {name} `{output}`. " +
+                    f"missing {diff} {tag} in example {index + 1} of {name} `{output}`. "
+                    +
                     f"Expected to find {necessary_tags[tag]} {tag}, found {count}."
                 )
 
@@ -63,6 +67,11 @@ def _check_tag_name(tag):
     if not re.fullmatch(tag_regex, "#" + tag.strip()):
         raise Exception("# %s is invalid, only letters and _ are allowed" %
                         (tag))
+
+
+def _check_defined_twice(generators, tag):
+    if tag in generators:
+        raise Exception("# %s is being defined twice" % (tag))
 
 
 def _check_previous_generator(generators, name):
@@ -74,8 +83,6 @@ def _check_previous_generator(generators, name):
         raise Exception("input examples missing on # %s" % name)
     if len(generators[name]["output"]) == 0:
         raise Exception("output missing on # %s" % name)
-
-
 
 
 def _check_all_used_tags(generators):
