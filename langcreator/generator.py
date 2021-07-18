@@ -6,8 +6,6 @@ from nltk import FreqDist
 from nltk.corpus import brown, stopwords  # type: ignore
 from typing import List
 from langcreator.common import Generators, InputOutput, InputOutputGenerator, get_tags, choice, builtin_generators
-from langcreator.parser import parse
-from numpy.random import rand
 
 nltk.download('brown', quiet=True)
 nltk.download('stopwords', quiet=True)
@@ -114,16 +112,3 @@ def save_generated(generated: List[InputOutput], path: str = None):
 
     with open(os.path.join(path, 'outputs.txt'), 'w') as f:
         f.write("\n".join(outputs))
-
-
-if __name__ == '__main__':
-    with open("langcreator/natural.md") as f:
-        content = f.read()
-
-    generators = parse(content)
-    n = 10_000
-    print(f"Generating {n} samples...")
-    samples = generate_samples(generators, n)
-    save_generated(samples)
-
-    print("Done!")
