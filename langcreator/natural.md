@@ -2,9 +2,52 @@
 
 `#name = #value`
 
+    #name = #value
     set #name to #value
     let #name to be #value
-    #name = #value
+    #name is #value
+    define #name as #value
+    #name := #value
+    initialize #name as #value
+
+# update
+
+`#name += #num_or_var`
+
+    #name += #num_or_var
+    add #num_or_var to #name
+
+`#name -= #num_or_var`
+
+    #name -= #num_or_var
+    subtract #num_or_var from #name
+
+`#name *= #num_or_var`
+
+    #name *= #num_or_var
+    multiply #num_or_var by #name
+
+`#name /= #num_or_var`
+
+    #name /= #num_or_var
+    divide #num_or_var by #name
+
+`#name **= #num_or_var`
+
+    raise #name to the power of #num_or_var
+
+`#name **= 2`
+
+    square #name
+
+`#name += 1`
+
+    #name++
+    increment #name
+
+`#name += #int`
+
+    increment #name by #int
 
 # function
 
@@ -19,6 +62,48 @@
     fn #name #params
     subroutine #name #params
     sub #name #params
+
+# operation
+
+`#num_or_var + #num_or_var`
+
+    #num_or_var + #num_or_var
+    sum #num_or_var and #num_or_var
+    add #num_or_var plus #num_or_var
+    #num_or_var plus #num_or_var
+
+`#string_or_var + #string_or_var`
+
+    #string_or_var + #string_or_var
+    concatenate #string_or_var and #string_or_var
+    join #string_or_var and #string_or_var
+
+`#num_or_var - #num_or_var`
+
+    #num_or_var - #num_or_var
+    #num_or_var minus #num_or_var
+    difference between #num_or_var and #num_or_var
+
+`#num_or_var * #num_or_var`
+
+    #num_or_var * #num_or_var
+    #num_or_var times #num_or_var
+    #num_or_var multiplied by #num_or_var
+
+`#num_or_var / #num_or_var`
+
+    #num_or_var / #num_or_var
+    #num_or_var divided by #num_or_var
+
+`#num_or_var ** #num_or_var`
+
+    #num_or_var ** #num_or_var
+    #num_or_var ^ #num_or_var
+    #num_or_var to the power of #num_or_var
+
+`#num_or_var ** 2`
+
+    #num_or_var squared
 
 # list_processing
 
@@ -75,24 +160,37 @@
     if not #condition
     unless #condition
 
-`if #condition:\n #expression`
+`if #condition:\n\t#expression_or_statement`
 
-    #expression if #condition
+    #expression_or_statement if #condition
 
-`#assignment if #condition else #value:`
+`#assignment if #condition else #value`
 
     #assignment if #condition else #value
 
-`if #condition:\n #expression\nelse:\n #expression:`
+`if #condition:\n\t#expression_or_statement\nelse:\n\t#expression_or_statement`
 
-    #expression if #condition else #expression
+    #expression_or_statement if #condition else #expression_or_statement
+
+# statement
+
+- if
+- update
+- assignment
 
 # expression
 
 - call_function
+- operation
+
+# expression_or_statement
+
+- expression
+- statement
 
 # value_or_expression
 
+- value
 - value
 - expression
 
@@ -129,6 +227,7 @@
 
 # condition
 
+- comparison
 - comparison
 - comparison
 - nested_condition
@@ -220,6 +319,16 @@
 
 - list
 - name
+- name
+
+# num_or_var
+
+- number
+- name
+
+# string_or_var
+
+- string
 - name
 
 # value
