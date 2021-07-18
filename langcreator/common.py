@@ -21,6 +21,8 @@ tag_regex = r"#[\w_]+'*"
 
 rng = np.random.default_rng()
 
+builtin_generators = ["int", "float", "string", "name"]
+
 
 def get_tags(str) -> List[str]:
     return [x for x in re.findall(tag_regex, str) if x.startswith("#")]

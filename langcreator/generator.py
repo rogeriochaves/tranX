@@ -5,7 +5,9 @@ import re
 from nltk import FreqDist
 from nltk.corpus import brown, stopwords  # type: ignore
 from typing import List
-from langcreator.common import Generators, InputOutput, InputOutputGenerator, get_tags, T, choice
+from langcreator.common import Generators, InputOutput, InputOutputGenerator, get_tags, choice, builtin_generators
+from langcreator.parser import parse
+from numpy.random import rand
 
 nltk.download('brown', quiet=True)
 nltk.download('stopwords', quiet=True)
@@ -22,7 +24,8 @@ reserved_words = set([
     "or", "remove", "delete", "set", "between", "same", "greater", "smaller",
     "equals", "use", "set", "let", "equals", "be", "to", "is", "do", "done",
     "exit", "break", "continue", "times", "end", "let", "remove", "update",
-    "jump", "go", "each", "switch", "case", "replace", "match"
+    "jump", "go", "each", "switch", "case", "replace", "match", "small",
+    "greater", "than"
 ] + numbers_written + value_types)
 stopwords_en = stopwords.words('english')
 
@@ -44,6 +47,19 @@ def generate_samples(generators: Generators, n: int) -> List[InputOutput]:
 
 def _generate_sample(generators: Generators, key: str) -> InputOutput:
     key = key.replace("'", "")
+    if key in builtin_generators:
+        return _generate_builtin(key)
+
+    generator = generators[key]
+    if type(generator) == dict:
+        return _generate_input_output_sample(generators, generator)
+    elif type(generator) == list:
+        return _generate_sample(generators, choice(generator))
+    else:
+        raise Exception(f"Invalid generator {key}")
+
+
+def _generate_builtin(key: str):
     if key == "int":
         input = output = str(choice(numbers))
         return (input, output)
@@ -53,14 +69,11 @@ def _generate_sample(generators: Generators, key: str) -> InputOutput:
     elif key == "float":
         input = output = str(choice(numbers) / choice([10, 100]))
         return (input, output)
-
-    generator = generators[key]
-    if type(generator) == dict:
-        return _generate_input_output_sample(generators, generator)
-    elif type(generator) == list:
-        return _generate_sample(generators, choice(generator))
+    elif key == "string":
+        input = output = _generate_string()
+        return (input, output)
     else:
-        raise Exception(f"Invalid generator {key}")
+        raise Exception(f"Builtin generator for {key} not implemented yet")
 
 
 def _generate_input_output_sample(
@@ -83,6 +96,12 @@ def _generate_name():
     return "_".join(choice(names, choice([1, 2, 3])))
 
 
+def _generate_string():
+    text = " ".join(choice(names, choice([1, 2, 3])))
+    quote = choice(["'", '"'])
+    return quote + text + quote
+
+
 def save_generated(generated: List[InputOutput], path: str = None):
     if path is None:
         path = os.path.dirname(__file__)
@@ -95,3 +114,16 @@ def save_generated(generated: List[InputOutput], path: str = None):
 
     with open(os.path.join(path, 'outputs.txt'), 'w') as f:
         f.write("\n".join(outputs))
+
+
+if __name__ == '__main__':
+    with open("langcreator/natural.md") as f:
+        content = f.read()
+
+    generators = parse(content)
+    n = 10_000
+    print(f"Generating {n} samples...")
+    samples = generate_samples(generators, n)
+    save_generated(samples)
+
+    print("Done!")

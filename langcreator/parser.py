@@ -1,7 +1,7 @@
-from marko.parser import Parser
-from marko.block import Heading, Paragraph, CodeBlock, List
-from marko.inline import CodeSpan
-from langcreator.common import tag_regex, get_tags
+from marko.parser import Parser  # type: ignore
+from marko.block import Heading, Paragraph, CodeBlock, List  # type: ignore
+from marko.inline import CodeSpan  # type: ignore
+from langcreator.common import tag_regex, get_tags, builtin_generators
 import collections
 import re
 
@@ -86,7 +86,7 @@ def _check_previous_generator(generators, name):
 
 
 def _check_all_used_tags(generators):
-    available_tags = ["#int", "#float", "#string", "#name"
+    available_tags = ["#" + x for x in builtin_generators
                       ] + ["#" + x for x in generators.keys()]
     for key, generator in generators.items():
         if type(generator) == list:

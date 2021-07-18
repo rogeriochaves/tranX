@@ -4,10 +4,11 @@ import unittest
 from langcreator.generator import generate_samples, save_generated
 import langcreator.common
 
-langcreator.common.set_seed(42)
-
 
 class GeneratorTestCase(unittest.TestCase):
+    def setUp(self):
+        langcreator.common.set_seed(42)
+
     def test_generates_simple_examples(self):
         generators = {
             "assignment": {
@@ -18,10 +19,10 @@ class GeneratorTestCase(unittest.TestCase):
         }
         result = generate_samples(generators, n=3)
 
-        self.assertEqual(result,
-                         [('let social_side to be 0.08', 'social_side = 0.08'),
-                          ('set v_help to 0.72', 'v_help = 0.72'),
-                          ('84', '84')])
+        self.assertEqual(
+            result,
+            [('let present_social to be 0.08', 'present_social = 0.08'),
+             ('set v_help to 0.72', 'v_help = 0.72'), ('84', '84')])
 
     def test_save_generated(self):
         generated = [("foo input", "foo"), ("bar input", "bar")]
@@ -49,6 +50,22 @@ class GeneratorTestCase(unittest.TestCase):
         result = generate_samples(generators, n=1)
 
         self.assertEqual(result, [
-            ("second item 45, first and foremost 50 and last but not least 37",
-             '[ 50, 45, 37 ]'),
+            ("second item 9, first and foremost 78 and last but not least 66",
+             '[ 78, 9, 66 ]'),
         ])
+
+    def test_generate_all_builtins(self):
+        builtins = ", ".join(
+            ["#" + x for x in langcreator.common.builtin_generators])
+        generators = {
+            "example": {
+                "output": f"({builtins})",
+                "inputs": [f"list of {builtins}"]
+            },
+            "number": ["int", "float"]
+        }
+        result = generate_samples(generators, n=1)
+
+        self.assertEqual(
+            result, [('list of 78, 6.6, "feet states", without',
+                      '(78, 6.6, "feet states", without)')])

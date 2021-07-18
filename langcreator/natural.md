@@ -22,11 +22,11 @@
 
 # list_processing
 
-`[ x[#name] for x in #list ]`
+`[ x[#name] for x in #list_or_var ]`
 
-    select #name from #list
-    from #list map #name
-    #list.map(#name' => #name'[#name])
+    select #name from #list_or_var
+    from #list_or_var map #name
+    #list_or_var.map(#name' => #name'[#name])
 
 `[ x[#name] for x in previous ]`
 
@@ -39,9 +39,9 @@
     |> filter #comparison
     grep #comparison
 
-`[ x[#name] for x in #list if #comparison ]`
+`[ x[#name] for x in #list_or_var if #comparison ]`
 
-    select #name from #list where #comparison
+    select #name from #list_or_var where #comparison
 
 # call_function
 
@@ -129,9 +129,14 @@
 
 # condition
 
+- comparison
+- comparison
+- nested_condition
+
+# nested_condition
+
 - parens_composition
 - composition
-- comparison
 
 # params
 
@@ -210,6 +215,12 @@
     (#value, #value, #value)
     (#value #value #value)
     list of #value, #value and #value
+
+# list_or_var
+
+- list
+- name
+- name
 
 # value
 
