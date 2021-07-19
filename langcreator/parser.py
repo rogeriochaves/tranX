@@ -47,19 +47,19 @@ def _check_tags(generators, name):
         input_tags = get_tags(input)
         input_tags = dict(collections.Counter(input_tags))
 
-        for tag, count in input_tags.items():
+        for tag, count in necessary_tags.items():
             tag = tag.replace("'", "")
-            if tag not in necessary_tags:
+            if tag not in input_tags:
                 raise Exception(
                     f"missing {tag} in example {index + 1} of {name} `{output}`"
                 )
 
-            diff = necessary_tags[tag] - count
+            diff = count - input_tags[tag]
             if diff > 0:
                 raise Exception(
                     f"missing {diff} {tag} in example {index + 1} of {name} `{output}`. "
                     +
-                    f"Expected to find {necessary_tags[tag]} {tag}, found {count}."
+                    f"Expected to find {count} {tag}, found {input_tags[tag]}."
                 )
 
 

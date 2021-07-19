@@ -172,6 +172,66 @@
 
     #expression_or_statement if #condition else #expression_or_statement
 
+# loop
+
+`for #name in #list_or_var:`
+
+    for #name in #list_or_var
+    each #name in #list_or_var
+
+`for #name in #list_or_var:\n\t#expression_or_statement`
+
+    #expression_or_statement for #name in #list_or_var
+    #expression_or_statement for each #name in #list_or_var
+
+`for _ in range(#int):`
+
+    #int times do
+    repeat #int times
+    do #int times
+
+`for _ in range(#int):\n\t#expression_or_statement`
+
+    #expression_or_statement #int times do
+    repeat #expression_or_statement #int times
+    do #expression_or_statement #int times
+
+`for #name in range(0, #int):`
+
+    for #name in 0 to #int
+    for #name in 0..#int
+
+`for #name in range(0, #int):\n\t#expression_or_statement`
+
+    #expression_or_statement for #name in 0 to #int
+    #expression_or_statement for #name in 0..#int
+
+`while #comparison:`
+
+    while #comparison
+    while #comparison do
+
+`while #comparison:\n\t#expression_or_statement`
+
+    #expression_or_statement while #comparison
+
+`while True:`
+
+    while true
+    loop
+
+`break`
+
+    break
+    exit loop
+    end the loop
+
+`continue`
+
+    continue
+    next
+    jump to the next item in the loop
+
 # statement
 
 - if

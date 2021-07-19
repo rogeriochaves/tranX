@@ -113,3 +113,5 @@ decodes/ # should I really ignore this? idk
 datasets/natural/datagen/**/inputs.txt
 datasets/natural/datagen/**/outputs.txt
 examples/*.py
+langcreator/inputs.txt
+langcreator/outputs.txt
