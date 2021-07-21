@@ -260,7 +260,7 @@ class Natural(object):
                 if isinstance(action, ApplyRuleAction):
                     assert action.production in transition_system.get_valid_continuating_productions(hyp)
                 # assert action.__class__ in transition_system.get_valid_continuation_types(
-                    # hyp)
+                # hyp)
 
                 p_t = -1
                 f_t = None

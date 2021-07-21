@@ -181,6 +181,8 @@ We also thank [Li Dong](http://homepages.inf.ed.ac.uk/s1478528/) for all the hel
 
 ## Rogerio Annotations
 
+Python version has to be >3.6 but <=3.6.9
+
 To test the AST parser:
 
 ```bash

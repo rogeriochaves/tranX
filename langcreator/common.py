@@ -1,10 +1,10 @@
-from typing import Dict, List, Tuple, TypeVar, TypedDict, Union
+from typing import Dict, List, Tuple, TypeVar, Union
 import re
 import random
-import numpy as np
+import numpy as np  # type: ignore
 
 
-class InputOutputGenerator(TypedDict):
+class InputOutputGenerator(Dict):
     output: str
     inputs: List[str]
 
