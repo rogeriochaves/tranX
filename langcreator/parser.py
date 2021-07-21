@@ -1,31 +1,39 @@
 from marko.parser import Parser  # type: ignore
 from marko.block import Heading, Paragraph, CodeBlock, List  # type: ignore
 from marko.inline import CodeSpan  # type: ignore
-from langcreator.common import tag_regex, get_tags, builtin_generators
+from langcreator.common import Generators, InputOutputGenerator, tag_regex, get_tags, builtin_generators
 import collections
 import re
 
 
-def parse(content):
+def parse(content: str) -> Generators:
     parser = Parser()
     document = parser.parse(content)
 
-    tag_name = None
-    generators = {}
+    tag_name = ""
+    generators: Generators = {}
     for item in document.children:
         if type(item) == Heading:
             _check_previous_generator(generators, tag_name)
             tag_name = item.children[0].children
             _check_tag_name(tag_name)
             _check_defined_twice(generators, tag_name)
-            generators[tag_name] = {"inputs": [], "output": ""}
+            generators[tag_name] = InputOutputGenerator()
         elif type(item) == Paragraph and type(item.children[0]) == CodeSpan:
-            output = item.children[0].children
-            generators[tag_name]["output"] = output
+            current_generator = generators[tag_name]
+            if type(current_generator) == InputOutputGenerator:
+                output = item.children[0].children
+                current_generator["output"] = output
+            else:
+                raise Exception(f"Mixing list and inputs/output in {tag_name}")
         elif type(item) == CodeBlock:
-            inputs = item.children[0].children.strip().split("\n")
-            generators[tag_name]["inputs"] = inputs
-            _check_tags(generators, tag_name)
+            current_generator = generators[tag_name]
+            if type(current_generator) == InputOutputGenerator:
+                inputs = item.children[0].children.strip().split("\n")
+                current_generator["inputs"] = inputs
+                _check_tags(generators, tag_name)
+            else:
+                raise Exception(f"Mixing list and inputs/output in {tag_name}")
         elif type(item) == List:
             generators[tag_name] = [
                 x.children[0].children[0].children for x in item.children
@@ -75,13 +83,13 @@ def _check_defined_twice(generators, tag):
 
 
 def _check_previous_generator(generators, name):
-    if name is None:
+    if not name:
         return
     if type(generators[name]) == list:
         return
-    if len(generators[name]["inputs"]) == 0:
+    if "inputs" not in generators[name]:
         raise Exception("input examples missing on # %s" % name)
-    if len(generators[name]["output"]) == 0:
+    if "output" not in generators[name]:
         raise Exception("output missing on # %s" % name)
 
 
