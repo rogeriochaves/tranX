@@ -210,17 +210,13 @@ class Natural(object):
 
         loaded_examples = []
 
-        annotations = []
-        codes = []
-        path = os.path.join(os.path.dirname(__file__), "datagen")
-        datagens = os.listdir(path)
-        for folder in datagens:
-            if "__" in folder or not os.path.isdir(os.path.join(path, folder)):
-                continue
-            with open(os.path.join(path, folder, "inputs.txt"), 'r') as file:
-                annotations += file.read().split('\n')
-            with open(os.path.join(path, folder, "outputs.txt"), 'r') as file:
-                codes += file.read().split('\n')
+        path = os.path.join(os.path.dirname(__file__), "..", "..",
+                            "langcreator")
+        with open(os.path.join(path, "inputs.txt"), 'r') as file:
+            annotations = file.read().split('\n')
+        with open(os.path.join(path, "outputs.txt"), 'r') as file:
+            codes = file.read().split('\n')
+
         annotation_codes = list(zip(annotations, codes))
         np.random.seed(42)
         np.random.shuffle(annotation_codes)
