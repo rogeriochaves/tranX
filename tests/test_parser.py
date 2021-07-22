@@ -20,6 +20,10 @@ class ParserTestCase(unittest.TestCase):
     define function #name #params
     fun #name #params
 
+`#name = lambda: #int`
+
+    lambda #name is #int
+
 # params
 
 - name
@@ -28,14 +32,13 @@ class ParserTestCase(unittest.TestCase):
         self.assertEqual(
             result, {
                 "assignment": {
-                    "inputs": ["set #name to #int", "let #name to be #int"],
-                    "output": "#name = #int"
+                    "#name = #int":
+                    ["set #name to #int", "let #name to be #int"],
                 },
                 "function": {
-                    "inputs":
+                    "def #name(#params):":
                     ["define function #name #params", "fun #name #params"],
-                    "output":
-                    "def #name(#params):"
+                    '#name = lambda: #int': ['lambda #name is #int']
                 },
                 "params": ["name"]
             })
@@ -64,12 +67,10 @@ class ParserTestCase(unittest.TestCase):
         self.assertEqual(
             result, {
                 "list_processing": {
-                    "inputs": [
+                    "[ x[#name] for x in [#int] ]": [
                         "select #name from [#int]", "from [#int] map #name",
                         "[#int].map(#name' => #name'[#name])"
                     ],
-                    "output":
-                    "[ x[#name] for x in [#int] ]"
                 },
             })
 

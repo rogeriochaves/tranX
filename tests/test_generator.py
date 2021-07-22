@@ -12,8 +12,7 @@ class GeneratorTestCase(unittest.TestCase):
     def test_generates_simple_examples(self):
         generators = {
             "assignment": {
-                "output": "#name = #number",
-                "inputs": ["set #name to #number", "let #name to be #number"]
+                "#name = #number": ["set #name to #number", "let #name to be #number"]
             },
             "number": ["int", "float"]
         }
@@ -40,11 +39,7 @@ class GeneratorTestCase(unittest.TestCase):
     def test_matches_prime_orders(self):
         generators = {
             "list": {
-                "output":
-                "[ #int, #int', #int'' ]",
-                "inputs": [
-                    "second item #int', first and foremost #int and last but not least #int''"
-                ]
+                "[ #int, #int', #int'' ]": ["second item #int', first and foremost #int and last but not least #int''"]
             },
         }
         result = generate_samples(generators, n=1)
@@ -59,8 +54,7 @@ class GeneratorTestCase(unittest.TestCase):
             ["#" + x for x in langcreator.common.builtin_generators])
         generators = {
             "example": {
-                "output": f"({builtins})",
-                "inputs": [f"list of {builtins}"]
+                f"({builtins})": [f"list of {builtins}"]
             },
             "number": ["int", "float"]
         }

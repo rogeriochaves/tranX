@@ -4,10 +4,7 @@ import random
 import numpy as np  # type: ignore
 
 
-class InputOutputGenerator(Dict):
-    output: str
-    inputs: List[str]
-
+InputOutputGenerator = Dict[str, List[str]]
 
 ListGenerator = List[str]
 

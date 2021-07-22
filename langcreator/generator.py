@@ -77,13 +77,14 @@ def _generate_builtin(key: str):
 def _generate_input_output_sample(
         generators: Generators,
         generator: InputOutputGenerator) -> InputOutput:
-    input_template = choice(generator["inputs"])
-    output_template = generator["output"]
+    output_template = choice(list(generator.keys()))
+    input_template = choice(generator[output_template])
 
     tags = get_tags(input_template)
     for tag in tags:
         key_ = tag.replace("#", "")
         (input, output) = _generate_sample(generators, key_)
+        output = _adjust_indentation(output)
         input_template = input_template.replace(tag, input, 1)
         output_template = output_template.replace(tag, output, 1)
 
