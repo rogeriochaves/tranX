@@ -85,6 +85,7 @@ def _generate_input_output_sample(
         key_ = tag.replace("#", "")
         (input, output) = _generate_sample(generators, key_)
         output = _adjust_indentation(output)
+        output = _adjust_ending(output)
         input_template = input_template.replace(tag, input, 1)
         output_template = output_template.replace(tag, output, 1)
 
@@ -101,7 +102,12 @@ def _generate_string():
     return quote + text + quote
 
 def _adjust_indentation(output: str):
-    return output.replace("\\t", "\\t\\t")
+    return output.replace("\\n", "\\n\\t")
+
+def _adjust_ending(output: str):
+    if len(output) > 0 and output[-1] == ':':
+       return output + ' pass'
+    return output
 
 def save_generated(generated: List[InputOutput], path: str = None):
     if path is None:

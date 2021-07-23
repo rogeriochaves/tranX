@@ -157,7 +157,7 @@ class Natural(object):
         try:
             ast_tree = ast.parse(canonical_code)
         except Exception as e:
-            print(canonical_code)
+            print("canonical_code:\n" + canonical_code)
             raise e
 
 
@@ -230,7 +230,7 @@ class Natural(object):
             if not src_query or not tgt_code:
                 continue
 
-            if (idx % 100 == 0):
+            if (idx % 100 == 0 or idx + 1 == len(annotation_codes)):
                 sys.stdout.write("\r%s / %s" % (idx, len(annotation_codes)))
                 sys.stdout.flush()
 

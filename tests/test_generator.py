@@ -70,11 +70,25 @@ class GeneratorTestCase(unittest.TestCase):
                 "if True:\\n\\t#nested_if": ["#nested_if if True"]
             },
             "nested_if": {
-                "if False:\\n\\tprint('hello')": ["never print hello"]
+                "if False:\\n\\tprint('hello')\\nelse:\\nprint('bye')": ["never print hello"]
             },
         }
         result = generate_samples(generators, n=1)
 
         self.assertEqual(result,
                          [('never print hello if True',
-                           "if True:\\n\\tif False:\\n\\t\\tprint('hello')")])
+                           "if True:\\n\\tif False:\\n\\t\\tprint('hello')\\n\\telse:\\n\\tprint('bye')")])
+
+    def test_generate_complete_hanging_if(self):
+        generators = {
+            "nested_if": {
+                "if False:\\n\\t#lonely_if\\nelse:\\nprint('whatever')": ["never #lonely_if"]
+            },
+            "lonely_if": {
+                "if True:": ["always"]
+            },
+        }
+        result = generate_samples(generators, n=1)
+
+        self.assertEqual(result,
+                         [('never always', "if False:\\n\\tif True: pass\\nelse:\\nprint('whatever')")])
