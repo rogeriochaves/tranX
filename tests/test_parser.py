@@ -194,3 +194,19 @@ class ParserTestCase(unittest.TestCase):
 """
         with self.assertRaisesRegex(Exception, "# foo is being defined twice"):
             parse(example)
+
+    def test_parses_special_marker_empty(self):
+        example = """
+# params
+
+`<empty>`
+
+    <empty>
+    ()
+"""
+        result = parse(example)
+        self.assertEqual(result, {
+            "params": {
+                "": ["", "()"],
+            },
+        })

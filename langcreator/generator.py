@@ -100,6 +100,8 @@ def _generate_string():
     quote = choice(["'", '"'])
     return quote + text + quote
 
+def _adjust_indentation(output: str):
+    return output.replace("\\t", "\\t\\t")
 
 def save_generated(generated: List[InputOutput], path: str = None):
     if path is None:

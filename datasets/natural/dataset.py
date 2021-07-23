@@ -75,6 +75,7 @@ class Natural(object):
             code = code + 'pass'
 
         code = code.replace("\\n", "\n")
+        code = code.replace("\\t", "\t")
 
         return code
 
@@ -226,6 +227,9 @@ class Natural(object):
 
         print('processing examples')
         for idx, (src_query, tgt_code) in enumerate(annotation_codes):
+            if not src_query or not tgt_code:
+                continue
+
             if (idx % 100 == 0):
                 sys.stdout.write("\r%s / %s" % (idx, len(annotation_codes)))
                 sys.stdout.flush()

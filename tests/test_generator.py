@@ -63,3 +63,18 @@ class GeneratorTestCase(unittest.TestCase):
         self.assertEqual(
             result, [('list of 78, 6.6, "feet states", without',
                       '(78, 6.6, "feet states", without)')])
+
+    def test_generate_nested_identation(self):
+        generators = {
+            "if": {
+                "if True:\\n\\t#nested_if": ["#nested_if if True"]
+            },
+            "nested_if": {
+                "if False:\\n\\tprint('hello')": ["never print hello"]
+            },
+        }
+        result = generate_samples(generators, n=1)
+
+        self.assertEqual(result,
+                         [('never print hello if True',
+                           "if True:\\n\\tif False:\\n\\t\\tprint('hello')")])

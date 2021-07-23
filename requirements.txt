@@ -1,5 +1,5 @@
 flask
-astor==0.8.1
+astor==0.7.1
 records
 pymongo
 numpy

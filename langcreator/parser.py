@@ -11,13 +11,13 @@ def parse(content: str) -> Generators:
     document = parser.parse(content)
 
     tag_name = ""
-    last_output = ""
+    last_output = None
     generators: Generators = {}
     for item in document.children:
         if type(item) == Heading:
             _check_previous_generator(generators, tag_name)
             # TODO: test
-            last_output = ""
+            last_output = None
             tag_name = item.children[0].children
             _check_tag_name(tag_name)
             _check_defined_twice(generators, tag_name)
@@ -25,18 +25,19 @@ def parse(content: str) -> Generators:
         elif type(item) == Paragraph and type(item.children[0]) == CodeSpan:
             current_generator = generators[tag_name]
             if type(current_generator) == dict:
-                last_output = item.children[0].children
+                last_output = item.children[0].children.replace("<empty>", "")
                 current_generator[last_output] = []
             else:
                 raise Exception(f"Mixing list and inputs/output in {tag_name}")
         elif type(item) == CodeBlock:
             current_generator = generators[tag_name]
-            if not last_output:
+            if last_output is None:
                 # TODO: test
                 raise Exception(
                     f"Input example defined without output in {tag_name}")
             elif type(current_generator) == dict:
                 inputs = item.children[0].children.strip().split("\n")
+                inputs = [x.replace("<empty>", "") for x in inputs]
                 current_generator[last_output] += inputs
                 _check_tags(current_generator, tag_name)
             else:
