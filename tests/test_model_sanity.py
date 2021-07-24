@@ -28,7 +28,7 @@ class ModelSanityTestCase(unittest.TestCase):
         self.assertEqual(parse("x = rand()"), "x = rand()")
 
     def test_if_condition(self):
-        self.assertEqual(parse("if rand() < 5"), "if rand() < 5:\n    pass")
+        self.assertEqual(parse("if rand() > 5"), "if rand() > 5:\n    pass")
 
     def test_postfix_if_call(self):
         self.assertEqual(parse("print(x) if x > 0"), "if x > 0:\n    print(x)")
@@ -37,7 +37,7 @@ class ModelSanityTestCase(unittest.TestCase):
         self.assertEqual(parse("x > 1"), "x > 1")
 
     def test_ternary(self):
-        self.assertEqual(parse('x = "heads" if rand() < 5 else "tails"'), "x = 'heads' if rand() < 5 else 'tails'")
+        self.assertEqual(parse('x = "heads" if rand() > 5 else "tails"'), "x = 'heads' if rand() > 5 else 'tails'")
 
     def test_postfix_loop(self):
         self.assertEqual(parse("throw_coin() 20 times"), "for _ in range(20):\n    throw_coin()")
@@ -49,7 +49,7 @@ class ModelSanityTestCase(unittest.TestCase):
         self.assertEqual(parse("set total to 1"), "total = 1")
 
     def test_ranged_loop(self):
-        self.assertEqual(parse("total times n for n in 1..i"), "for n in range(1, i):\n    total * n")
+        self.assertEqual(parse("total times n for n in 2..i"), "for n in range(2, i):\n    total * n")
 
     def test_decimal_numbers(self):
         self.assertEqual(parse("0.1 + 0.2"), "0.1 + 0.2")

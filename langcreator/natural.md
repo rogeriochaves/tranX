@@ -1,14 +1,14 @@
 # assignment
 
-`#name = #value`
+`#name = #value_or_expression`
 
-    #name = #value
-    set #name to #value
-    let #name to be #value
-    #name is #value
-    define #name as #value
-    #name := #value
-    initialize #name as #value
+    #name = #value_or_expression
+    set #name to #value_or_expression
+    let #name to be #value_or_expression
+    #name is #value_or_expression
+    define #name as #value_or_expression
+    #name := #value_or_expression
+    initialize #name as #value_or_expression
 
 # update
 
@@ -65,12 +65,12 @@
 
 # operation
 
-`#num_or_var + #num_or_var`
+`#op + #op`
 
-    #num_or_var + #num_or_var
-    sum #num_or_var and #num_or_var
-    add #num_or_var plus #num_or_var
-    #num_or_var plus #num_or_var
+    #op + #op
+    sum #op and #op
+    add #op plus #op
+    #op plus #op
 
 `#string_or_var + #string_or_var`
 
@@ -78,32 +78,50 @@
     concatenate #string_or_var and #string_or_var
     join #string_or_var and #string_or_var
 
-`#num_or_var - #num_or_var`
+`#op - #op`
 
-    #num_or_var - #num_or_var
-    #num_or_var minus #num_or_var
-    difference between #num_or_var and #num_or_var
+    #op - #op
+    #op minus #op
+    difference between #op and #op
 
-`#num_or_var * #num_or_var`
+`#op * #op`
 
-    #num_or_var * #num_or_var
-    #num_or_var times #num_or_var
-    #num_or_var multiplied by #num_or_var
+    #op * #op
+    #op times #op
+    #op multiplied by #op
 
-`#num_or_var / #num_or_var`
+`#op / #op`
 
-    #num_or_var / #num_or_var
-    #num_or_var divided by #num_or_var
+    #op / #op
+    #op divided by #op
 
-`#num_or_var ** #num_or_var`
+`#op ** #op`
 
-    #num_or_var ** #num_or_var
-    #num_or_var ^ #num_or_var
-    #num_or_var to the power of #num_or_var
+    #op ** #op
+    #op ^ #op
+    #op to the power of #op
 
-`#num_or_var ** 2`
+`#op ** 2`
 
-    #num_or_var squared
+    #op squared
+
+# parens_operation
+
+`(#operation)`
+
+    (#operation)
+
+# op
+
+- num_or_var
+- num_or_var
+- num_or_var
+- nested_operation
+
+# nested_operation
+
+- parens_operation
+- operation
 
 # list_processing
 
@@ -192,7 +210,7 @@
 
 `for _ in range(#int):\n\t#expression_or_statement`
 
-    #expression_or_statement #int times do
+    #expression_or_statement #int times
     repeat #expression_or_statement #int times
     do #expression_or_statement #int times
 
@@ -266,6 +284,31 @@
     #value_or_expression > #value_or_expression
     #value_or_expression gt #value_or_expression
     #value_or_expression is greater than #value_or_expression
+
+`#value_or_expression < #value_or_expression`
+
+    #value_or_expression < #value_or_expression
+    #value_or_expression lt #value_or_expression
+    #value_or_expression is smaller than #value_or_expression
+
+`#value_or_expression >= #value_or_expression`
+
+    #value_or_expression >= #value_or_expression
+    #value_or_expression gte #value_or_expression
+    #value_or_expression is greater or equals than #value_or_expression
+
+`#value_or_expression <= #value_or_expression`
+
+    #value_or_expression <= #value_or_expression
+    #value_or_expression lte #value_or_expression
+    #value_or_expression is lower or equals than #value_or_expression
+
+`#value_or_expression != #value_or_expression`
+
+    #value_or_expression != #value_or_expression
+    #value_or_expression /= #value_or_expression
+    #value_or_expression is not #value_or_expression
+    #value_or_expression is different than #value_or_expression
 
 # composition
 
