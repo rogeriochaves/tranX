@@ -115,3 +115,4 @@ datasets/natural/datagen/**/outputs.txt
 examples/*.py
 langcreator/inputs.txt
 langcreator/outputs.txt
+.vscode

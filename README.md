@@ -190,6 +190,12 @@ cd asdl/lang/py3
 PYTHONPATH=../../../ python3 demo.py
 ```
 
+To generate data:
+
+```bash
+python3 langcreator/run.py
+```
+
 To make the dataset split:
 
 ```bash
@@ -200,12 +206,6 @@ To train model:
 
 ```bash
 ./scripts/natural/train.sh
-```
-
-To generate data:
-
-```bash
-PYTHONPATH=. python3 datasets/natural/datagen/generate_all.py
 ```
 
 To run tests:
