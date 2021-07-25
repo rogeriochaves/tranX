@@ -86,6 +86,7 @@ def init_arg_parser():
     arg_parser.add_argument('--vocab', type=str, help='Path of the serialized vocabulary')
     arg_parser.add_argument('--glove_embed_path', default=None, type=str, help='Path to pretrained Glove mebedding')
 
+    arg_parser.add_argument('--dataset_path', type=str, help='path where inputs.txt and outputs.txt are located')
     arg_parser.add_argument('--train_file', type=str, help='path to the training target file')
     arg_parser.add_argument('--dev_file', type=str, help='path to the dev source file')
     arg_parser.add_argument('--pretrain', type=str, help='path to the pretrained model file')

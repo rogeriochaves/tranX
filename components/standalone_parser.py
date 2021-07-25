@@ -10,7 +10,7 @@ from components.dataset import Example
 from model.parser import Parser
 from model.reconstruction_model import Reconstructor
 from model.paraphrase import ParaphraseIdentificationModel
-from datasets.natural import example_processor
+from datasets.python3 import example_processor
 
 if six.PY3:
     pass

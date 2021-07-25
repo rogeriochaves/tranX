@@ -111,6 +111,6 @@ data/
 saved_models/
 decodes/ # should I really ignore this? idk
 examples/*.py
-datasets/*/inputs.txt
-datasets/*/outputs.txt
+natural/dataset/*
+natural/dataset/*
 .vscode

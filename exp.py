@@ -568,6 +568,8 @@ if __name__ == '__main__':
     args = init_config()
     print(args, file=sys.stderr)
     if args.mode == 'train':
+        from datasets.python3.dataset import Python3
+        Python3.process_python3_dataset(args.dataset_path)
         train(args)
     elif args.mode in ('train_reconstructor', 'train_paraphrase_identifier'):
         train_rerank_feature(args)

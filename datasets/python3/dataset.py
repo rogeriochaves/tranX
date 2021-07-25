@@ -52,7 +52,7 @@ def replace_string_ast_nodes(py_ast, str_map):
                         node.s = val
 
 
-class Natural(object):
+class Python3(object):
     @staticmethod
     def canonicalize_code(code):
         if p_elif.match(code):
@@ -150,10 +150,10 @@ class Natural(object):
     @staticmethod
     def canonicalize_example(query, code):
 
-        canonical_query, str_map = Natural.canonicalize_query(query)
+        canonical_query, str_map = Python3.canonicalize_query(query)
         query_tokens = canonical_query.split(' ')
 
-        canonical_code = Natural.canonicalize_code(code)
+        canonical_code = Python3.canonicalize_code(code)
         try:
             ast_tree = ast.parse(canonical_code)
         except Exception as e:
@@ -161,11 +161,11 @@ class Natural(object):
             raise e
 
 
-        Natural.canonicalize_str_nodes(ast_tree, str_map)
+        Python3.canonicalize_str_nodes(ast_tree, str_map)
         canonical_code = astor.to_source(ast_tree)
 
         # sanity check
-        # decanonical_code = Natural.decanonicalize_code(canonical_code, str_map)
+        # decanonical_code = Python3.decanonicalize_code(canonical_code, str_map)
         # decanonical_code_tokens = tokenize_code(decanonical_code)
         # raw_code_tokens = tokenize_code(code)
         # if decanonical_code_tokens != raw_code_tokens:
@@ -175,7 +175,7 @@ class Natural(object):
         #     ast_tree = ast.parse(canonical_code).body[0]
         # except:
         #     print('error!')
-        #     canonical_code = Natural.canonicalize_code(code)
+        #     canonical_code = Python3.canonicalize_code(code)
         #     gold_ast_tree = ast.parse(canonical_code).body[0]
         #     str_map = {}
 
@@ -203,7 +203,7 @@ class Natural(object):
         return query_tokens, canonical_code, str_map
 
     @staticmethod
-    def parse_natural_dataset(asdl_file_path, max_query_len=70, vocab_freq_cutoff=10):
+    def parse_python3_dataset(dataset_path, asdl_file_path, max_query_len=70, vocab_freq_cutoff=10):
         asdl_text = open(asdl_file_path).read()
         print('building grammar')
         grammar = ASDLGrammar.from_text(asdl_text)
@@ -211,10 +211,9 @@ class Natural(object):
 
         loaded_examples = []
 
-        path = os.path.dirname(__file__)
-        with open(os.path.join(path, "inputs.txt"), 'r') as file:
+        with open(os.path.join(dataset_path, "inputs.txt"), 'r') as file:
             annotations = file.read().split('\n')
-        with open(os.path.join(path, "outputs.txt"), 'r') as file:
+        with open(os.path.join(dataset_path, "outputs.txt"), 'r') as file:
             codes = file.read().split('\n')
 
         annotation_codes = list(zip(annotations, codes))
@@ -236,7 +235,7 @@ class Natural(object):
             src_query = src_query.strip()
             tgt_code = tgt_code.strip()
 
-            src_query_tokens, tgt_canonical_code, str_map = Natural.canonicalize_example(
+            src_query_tokens, tgt_canonical_code, str_map = Python3.canonicalize_example(
                 src_query, tgt_code)
             python_ast = ast.parse(tgt_canonical_code)#.body[0]
             gold_source = astor.to_source(python_ast).strip()
@@ -351,16 +350,16 @@ class Natural(object):
         return (train_examples, dev_examples, test_examples), vocab
 
     @staticmethod
-    def process_natural_dataset():
+    def process_python3_dataset(dataset_path):
         vocab_freq_cutoff = 15  # TODO: found the best cutoff threshold
 
-        (train, dev, test), vocab = Natural.parse_natural_dataset('asdl/lang/py3/py3_asdl.simplified.txt',
+        (train, dev, test), vocab = Python3.parse_python3_dataset(dataset_path, 'asdl/lang/py3/py3_asdl.simplified.txt',
                                                                   vocab_freq_cutoff=vocab_freq_cutoff)
 
-        pickle.dump(train, open('data/natural/train.bin', 'wb'))
-        pickle.dump(dev, open('data/natural/dev.bin', 'wb'))
-        pickle.dump(test, open('data/natural/test.bin', 'wb'))
-        pickle.dump(vocab, open('data/natural/vocab.freq%d.bin' %
+        pickle.dump(train, open(f'{dataset_path}/train.bin', 'wb'))
+        pickle.dump(dev, open(f'{dataset_path}/dev.bin', 'wb'))
+        pickle.dump(test, open(f'{dataset_path}/test.bin', 'wb'))
+        pickle.dump(vocab, open(f'{dataset_path}/vocab.freq%d.bin' %
                     vocab_freq_cutoff, 'wb'))
 
     @staticmethod
@@ -368,8 +367,8 @@ class Natural(object):
         asdl_text = open('asdl/lang/py3/py3_asdl.simplified.txt').read()
         grammar = ASDLGrammar.from_text(asdl_text)
 
-        annot_file = 'data/natural/all.anno'
-        code_file = 'data/natural/all.code'
+        annot_file = 'data/python3/all.anno'
+        code_file = 'data/python3/all.code'
 
         transition_system = Python3TransitionSystem(grammar)
 
@@ -377,7 +376,7 @@ class Natural(object):
             src_query = src_query.strip()
             tgt_code = tgt_code.strip()
 
-            query_tokens, tgt_canonical_code, str_map = Natural.canonicalize_example(
+            query_tokens, tgt_canonical_code, str_map = Python3.canonicalize_example(
                 src_query, tgt_code)
             python_ast = ast.parse(tgt_canonical_code)#.body[0]
             gold_source = astor.to_source(python_ast)
@@ -404,9 +403,9 @@ class Natural(object):
             print(idx)
 
     @staticmethod
-    def canonicalize_raw_natural_oneliner(code):
+    def canonicalize_raw_python3_oneliner(code):
         # use the astor-style code
-        code = Natural.canonicalize_code(code)
+        code = Python3.canonicalize_code(code)
         py_ast = ast.parse(code)#.body[0]
         code = astor.to_source(py_ast).strip()
 
@@ -429,15 +428,15 @@ def generate_vocab_for_paraphrase_model(vocab_path, save_path):
 
 
 if __name__ == '__main__':
-    # Natural.run()
+    # Python3.run()
     # f1 = Field('hahah', ASDLPrimitiveType('123'), 'single')
     # rf1 = RealizedField(f1, value=123)
     #
     # # print(f1 == rf1)
     # a = {f1: 1}
     # print(a[rf1])
-    Natural.process_natural_dataset()
-    # generate_vocab_for_paraphrase_model('data/natural/vocab.freq10.bin', 'data/natural/vocab.para.freq10.bin')
+    Python3.process_python3_dataset()
+    # generate_vocab_for_paraphrase_model('data/python3/vocab.freq10.bin', 'data/python3/vocab.para.freq10.bin')
 
     # py_ast = ast.parse("""sorted(asf, reverse='k' 'k', k='re' % sdf)""")
     # canonicalize_py_ast(py_ast)

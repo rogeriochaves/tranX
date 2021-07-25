@@ -4,10 +4,10 @@ import ast
 import astor
 
 
-@Registrable.register('natural_evaluator')
-class NaturalEvaluator(Evaluator):
+@Registrable.register('python3_evaluator')
+class Python3Evaluator(Evaluator):
     def __init__(self, transition_system=None, args=None):
-        super(NaturalEvaluator, self).__init__()
+        super(Python3Evaluator, self).__init__()
         self.transition_system = transition_system
 
     def is_hyp_correct(self, example, hyp):

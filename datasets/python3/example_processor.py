@@ -2,17 +2,17 @@ import astor
 
 from common.registerable import Registrable
 from datasets.utils import ExampleProcessor
-from datasets.natural.dataset import Natural, replace_string_ast_nodes
+from datasets.python3.dataset import Python3, replace_string_ast_nodes
 from asdl.lang.py.py_asdl_helper import asdl_ast_to_python_ast
 
 
-@Registrable.register('natural_example_processor')
-class NaturalExampleProcessor(ExampleProcessor):
+@Registrable.register('python3_example_processor')
+class Python3ExampleProcessor(ExampleProcessor):
     def __init__(self, transition_system):
         self.transition_system = transition_system
 
     def pre_process_utterance(self, utterance):
-        canonical_utterance, str2slot_map = Natural.canonicalize_query(
+        canonical_utterance, str2slot_map = Python3.canonicalize_query(
             utterance)
 
         meta_info = str2slot_map

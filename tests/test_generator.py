@@ -1,4 +1,4 @@
-from datasets.natural.datagen.base_generator import save_generated
+from datasets.python3.datagen.base_generator import save_generated
 import unittest
 
 from langcreator.generator import generate_samples, save_generated
