@@ -211,8 +211,7 @@ class Natural(object):
 
         loaded_examples = []
 
-        path = os.path.join(os.path.dirname(__file__), "..", "..",
-                            "langcreator")
+        path = os.path.dirname(__file__)
         with open(os.path.join(path, "inputs.txt"), 'r') as file:
             annotations = file.read().split('\n')
         with open(os.path.join(path, "outputs.txt"), 'r') as file:

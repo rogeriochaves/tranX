@@ -109,10 +109,7 @@ def _adjust_ending(output: str):
        return output + ' pass'
     return output
 
-def save_generated(generated: List[InputOutput], path: str = None):
-    if path is None:
-        path = os.path.dirname(__file__)
-
+def save_generated(generated: List[InputOutput], path: str):
     inputs = [i for i, _ in generated]
     outputs = [o for _, o in generated]
 
